@@ -230,6 +230,55 @@
     .scoring-info { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; margin-bottom: 18px; font-size: 12px; color: var(--dim); line-height: 1.8; }
     .scoring-info strong { color: var(--accent); }
 
+    /* ── PLAYOFF BRACKET ── */
+    .round-section { margin-bottom: 28px; }
+    .round-header {
+      font-size: 11px; font-weight: 800; color: var(--accent);
+      text-transform: uppercase; letter-spacing: 2px;
+      padding: 0 0 10px; border-bottom: 1px solid var(--border);
+      margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;
+    }
+    .round-pts-badge {
+      background: var(--accent-dim); color: var(--accent);
+      border: 1px solid rgba(201,170,113,0.3); border-radius: 20px;
+      padding: 2px 9px; font-size: 10px; font-weight: 700; letter-spacing: 0;
+    }
+    .match-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; margin-bottom: 8px; overflow: hidden;
+    }
+    .match-num {
+      font-size: 10px; color: var(--dim); padding: 5px 12px 0;
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .match-teams { display: grid; grid-template-columns: 1fr 1fr; }
+    .po-team {
+      display: flex; align-items: center; gap: 7px; padding: 10px 11px;
+      cursor: pointer; border: none; background: none; color: var(--text);
+      transition: background 0.15s; text-align: left; width: 100%;
+      border-top: 1px solid var(--border);
+    }
+    .po-team:first-child { border-right: 0.5px solid var(--border); }
+    .po-team:active { transform: scale(0.97); }
+    .po-team.picked { background: rgba(201,170,113,0.15); }
+    .po-team.correct { background: rgba(39,174,96,0.2); }
+    .po-team.wrong { opacity: 0.4; }
+    .po-team.tbd { color: var(--dim); cursor: default; font-style: italic; }
+    .po-team:disabled { opacity: 0.6; cursor: default; }
+    .po-flag { font-size: 19px; flex-shrink: 0; }
+    .po-name { flex: 1; font-size: 11px; font-weight: 600; line-height: 1.3; }
+    .po-check { font-size: 13px; flex-shrink: 0; }
+    .playoff-save-wrap { margin-top: 4px; margin-bottom: 32px; }
+    .playoff-progress { font-size: 12px; color: var(--dim); text-align: center; margin-bottom: 8px; }
+
+    /* ── LEADERBOARD 4-COL ── */
+    .lb-scores { display: flex; gap: 10px; align-items: center; flex-shrink: 0; }
+    .lb-score-block { text-align: center; min-width: 34px; }
+    .lb-score-val { font-size: 17px; font-weight: 900; color: var(--accent); line-height: 1; }
+    .lb-score-val.total-pts { color: #fff; font-size: 21px; }
+    .lb-score-lbl { font-size: 9px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.3px; margin-top: 2px; }
+    .lb-divider { width: 1px; height: 28px; background: var(--border); flex-shrink: 0; }
+
     @media (min-width: 501px) {
       body { border-left: 1px solid var(--border); border-right: 1px solid var(--border); box-shadow: 0 0 60px rgba(0,0,0,0.5); }
     }
@@ -314,7 +363,14 @@
       </div>
     </div>
     <div id="playoffOpen" style="display:none">
-      <div class="empty">🏆 Playoff bracket coming soon — stay tuned!</div>
+      <div class="scoring-info">
+        🏆 <strong>Playoff Scoring:</strong> R32=1pt · R16=2pts · QF=3pts · SF=4pts · Final=5pts — pick winners all the way through!
+      </div>
+      <div id="playoffBracketContainer"></div>
+      <div class="playoff-save-wrap">
+        <div class="playoff-progress" id="playoffProgressText"></div>
+        <button class="save-btn" id="savePlayoffBtn" onclick="savePlayoffPicks()">💾 Save Playoff Picks</button>
+      </div>
     </div>
   </div>
 
@@ -411,11 +467,20 @@ function abbr(t){ return ABBR[t] || t.slice(0,3).toUpperCase(); }
 
 const ORDINALS = ['1st','2nd','3rd','4th'];
 
+// ── Playoff Constants ──
+const PLAYOFF_ROUNDS   = ['R32','R16','QF','SF','F'];
+const ROUND_LABELS     = {R32:'Round of 32', R16:'Round of 16', QF:'Quarterfinals', SF:'Semifinals', F:'⚽ Final'};
+const ROUND_PTS        = {R32:1, R16:2, QF:3, SF:4, F:5};
+const ROUND_COUNTS     = {R32:16, R16:8, QF:4, SF:2, F:1};
+const PLAYOFF_DEADLINE = new Date("2026-06-28T15:00:00Z"); // 1 hr before first R32 game
+
 // ── App State ──
 let db, currentUser;
-let picks   = {};   // { A:['Mexico',...], ... }
-let results = {};   // admin-entered actuals
+let picks          = {};  // { A:['Mexico',...], ... }
+let results        = {};  // group stage actuals
 let playoffUnlocked = false;
+let playoffBracket = {};  // { R32:[{home,away,winner},...], R16:[...], ... }
+let playoffPicks   = {};  // { 'R32-0':'Brazil', 'R16-0':'France', ... }
 let isAdmin = false;
 let logoTaps = 0;
 
@@ -479,9 +544,19 @@ async function loadSettings(){
     if(doc.exists){
       const d = doc.data();
       playoffUnlocked = d.playoffUnlocked || false;
-      if(playoffUnlocked) applyPlayoffUnlock();
+      if(playoffUnlocked) await applyPlayoffUnlock();
     }
   } catch(e){ console.warn('Settings offline:', e.message); }
+}
+
+async function loadPlayoffBracket(){
+  try{
+    const doc = await db.collection('results').doc('playoff').get();
+    if(doc.exists) playoffBracket = doc.data() || {};
+    // Load user's playoff picks
+    const pdoc = await db.collection('picks').doc(currentUser.id).get();
+    if(pdoc.exists) playoffPicks = pdoc.data().playoffPicks || {};
+  } catch(e){ console.warn('Playoff data offline:', e.message); }
 }
 
 async function loadUserPicks(){
@@ -507,11 +582,15 @@ async function savePicks(){
   btn.textContent = 'Saving…'; btn.disabled = true;
 
   try{
+    const gs = calculateScore();
+    const ps = calculatePlayoffScore();
     await db.collection('picks').doc(currentUser.id).set({
       name: currentUser.name,
       picks,
       savedAt: firebase.firestore.FieldValue.serverTimestamp(),
-      score: calculateScore()
+      score: gs,
+      playoffScore: ps,
+      totalScore: gs + ps
     }, { merge: true });
 
     btn.textContent = '✅ Saved!'; btn.classList.add('saved');
@@ -525,15 +604,17 @@ async function savePicks(){
 
 async function loadLeaderboard(){
   try{
-    const snap = await db.collection('picks').orderBy('score','desc').limit(60).get();
+    let snap;
+    try { snap = await db.collection('picks').orderBy('totalScore','desc').limit(60).get(); }
+    catch(e){ snap = await db.collection('picks').orderBy('score','desc').limit(60).get(); }
     const rows = [];
     snap.forEach(d => rows.push({ id:d.id, ...d.data() }));
     renderLeaderboard(rows);
   } catch(e){
-    // Possibly no composite index yet; show just current user
     renderLeaderboard(currentUser ? [{
       id: currentUser.id, name: currentUser.name,
-      picks, score: calculateScore()
+      picks, score: calculateScore(), playoffScore: calculatePlayoffScore(),
+      totalScore: calculateScore() + calculatePlayoffScore()
     }] : []);
   }
 }
@@ -578,8 +659,22 @@ function calculateScore(){
   return total;
 }
 
+function calculatePlayoffScore(){
+  let total = 0;
+  for(const round of PLAYOFF_ROUNDS){
+    const count = ROUND_COUNTS[round];
+    for(let i=0; i<count; i++){
+      const key = `${round}-${i}`;
+      const actual = playoffBracket[round]?.[i]?.winner;
+      if(actual && playoffPicks[key] === actual) total += ROUND_PTS[round];
+    }
+  }
+  return total;
+}
+
 function updateScore(){
-  document.getElementById('hdScore').textContent = calculateScore() + ' pts';
+  const total = calculateScore() + calculatePlayoffScore();
+  document.getElementById('hdScore').textContent = total + ' pts';
 }
 
 // ════════════════════ RENDERING ════════════════════
@@ -662,21 +757,36 @@ function renderLeaderboard(rows){
   const c = document.getElementById('lbContainer');
   if(!rows.length){ c.innerHTML = '<div class="empty">No picks submitted yet — be first!</div>'; return; }
 
+  // Sort by totalScore descending
+  rows.sort((a,b) => ((b.totalScore||b.score||0) - (a.totalScore||a.score||0)));
+
   c.innerHTML = rows.map((row, i) => {
     const isMe = row.id === currentUser.id;
     const r = i + 1;
-    const rankClass = r===1?'g':r===2?'s':r===3?'b':'';
-    const rankDisp  = r===1?'🥇':r===2?'🥈':r===3?'🥉':r;
-    const done = Object.keys(row.picks||{}).filter(g=>(row.picks[g]||[]).length===4).length;
+    const rankDisp = r===1?'🥇':r===2?'🥈':r===3?'🥉':r;
+    const gScore = row.score || 0;
+    const pScore = row.playoffScore || 0;
+    const total  = row.totalScore != null ? row.totalScore : gScore;
     return `<div class="lb-item ${isMe?'me':''}">
-      <div class="lb-rank ${rankClass}">${rankDisp}</div>
+      <div class="lb-rank">${rankDisp}</div>
       <div class="lb-info">
         <div class="lb-name">${row.name}${isMe?' <span style="color:var(--accent);font-size:11px">(you)</span>':''}</div>
-        <div class="lb-meta">${done}/12 groups submitted</div>
       </div>
-      <div class="lb-pts">
-        <div class="lb-score">${row.score||0}</div>
-        <div class="lb-pts-label">pts</div>
+      <div class="lb-scores">
+        <div class="lb-score-block">
+          <div class="lb-score-val">${gScore}</div>
+          <div class="lb-score-lbl">Groups</div>
+        </div>
+        <div class="lb-divider"></div>
+        <div class="lb-score-block">
+          <div class="lb-score-val">${pScore}</div>
+          <div class="lb-score-lbl">Playoffs</div>
+        </div>
+        <div class="lb-divider"></div>
+        <div class="lb-score-block">
+          <div class="lb-score-val total-pts">${total}</div>
+          <div class="lb-score-lbl">Total</div>
+        </div>
       </div>
     </div>`;
   }).join('');
@@ -727,10 +837,144 @@ function updateBanner(){
   }
 }
 
-function applyPlayoffUnlock(){
+async function applyPlayoffUnlock(){
   document.getElementById('tabBtn-playoffs').textContent = 'Playoffs';
   document.getElementById('playoffLocked').style.display = 'none';
   document.getElementById('playoffOpen').style.display = 'block';
+  await loadPlayoffBracket();
+  renderPlayoffBracket();
+}
+
+// ════════════════════ PLAYOFF BRACKET ════════════════════
+function getMatchTeams(round, idx){
+  // Use real ESPN data if available
+  const m = playoffBracket[round]?.[idx];
+  if(m && m.home && m.away) return { home: m.home, away: m.away };
+  // Derive from user's picks in previous round
+  const ri = PLAYOFF_ROUNDS.indexOf(round);
+  if(ri <= 0) return { home: null, away: null };
+  const prev = PLAYOFF_ROUNDS[ri - 1];
+  return {
+    home: playoffPicks[`${prev}-${idx*2}`]   || null,
+    away: playoffPicks[`${prev}-${idx*2+1}`] || null,
+  };
+}
+
+function renderPlayoffBracket(){
+  const c = document.getElementById('playoffBracketContainer');
+  if(!c) return;
+  const locked = new Date() >= PLAYOFF_DEADLINE;
+  let html = '';
+
+  for(const round of PLAYOFF_ROUNDS){
+    const count = ROUND_COUNTS[round];
+    html += `<div class="round-section">
+      <div class="round-header">
+        <span>${ROUND_LABELS[round]}</span>
+        <span class="round-pts-badge">${ROUND_PTS[round]} pt${ROUND_PTS[round]>1?'s':''}/correct</span>
+      </div>`;
+
+    for(let i=0; i<count; i++){
+      const {home, away} = getMatchTeams(round, i);
+      const key = `${round}-${i}`;
+      const userPick  = playoffPicks[key];
+      const actual    = playoffBracket[round]?.[i]?.winner || null;
+
+      const teamBtn = (team) => {
+        if(!team) return `<button class="po-team tbd" disabled>
+          <span class="po-flag">🏳️</span><span class="po-name">TBD</span></button>`;
+        const isPicked   = userPick === team;
+        const isCorrect  = actual && isPicked && actual === team;
+        const isWrong    = actual && isPicked && actual !== team;
+        let cls = 'po-team';
+        if(isPicked){ cls += isCorrect ? ' correct' : isWrong ? ' wrong' : ' picked'; }
+        const check = isCorrect ? '✅' : isWrong ? '❌' : isPicked ? '✓' : '';
+        const safe  = team.replace(/'/g,"\\'");
+        const click = locked ? '' : `pickPlayoffWinner('${round}',${i},'${safe}')`;
+        return `<button class="${cls}" onclick="${click}" ${locked?'disabled':''}>
+          <span class="po-flag">${FLAGS[team]||'🏳️'}</span>
+          <span class="po-name">${team}</span>
+          ${check?`<span class="po-check">${check}</span>`:''}
+        </button>`;
+      };
+
+      const matchLabel = round === 'F' ? 'Championship' : `Match ${i+1}`;
+      html += `<div class="match-card">
+        <div class="match-num">${matchLabel}</div>
+        <div class="match-teams">${teamBtn(home)}${teamBtn(away)}</div>
+      </div>`;
+    }
+    html += `</div>`;
+  }
+
+  c.innerHTML = html;
+  updatePlayoffSaveBtn();
+}
+
+function pickPlayoffWinner(round, matchIdx, team){
+  if(new Date() >= PLAYOFF_DEADLINE){ toast('⏰ Playoff picks are locked','err'); return; }
+  const key = `${round}-${matchIdx}`;
+  if(playoffPicks[key] === team){
+    delete playoffPicks[key];
+    clearDownstreamPicks(round, matchIdx);
+  } else {
+    const old = playoffPicks[key];
+    playoffPicks[key] = team;
+    if(old && old !== team) clearDownstreamPicks(round, matchIdx);
+  }
+  renderPlayoffBracket();
+}
+
+function clearDownstreamPicks(round, matchIdx){
+  const ri = PLAYOFF_ROUNDS.indexOf(round);
+  if(ri >= PLAYOFF_ROUNDS.length - 1) return;
+  const next = PLAYOFF_ROUNDS[ri + 1];
+  const ni   = Math.floor(matchIdx / 2);
+  const nkey = `${next}-${ni}`;
+  if(playoffPicks[nkey]){
+    delete playoffPicks[nkey];
+    clearDownstreamPicks(next, ni);
+  }
+}
+
+function updatePlayoffSaveBtn(){
+  const btn  = document.getElementById('savePlayoffBtn');
+  const prog = document.getElementById('playoffProgressText');
+  if(!btn) return;
+  const locked = new Date() >= PLAYOFF_DEADLINE;
+  const total  = Object.values(ROUND_COUNTS).reduce((a,b)=>a+b,0); // 31
+  const picked = Object.keys(playoffPicks).length;
+  if(locked){
+    btn.textContent = '🔒 Playoff Picks Locked'; btn.disabled = true;
+  } else {
+    btn.textContent = `💾 Save Playoff Picks`; btn.disabled = false;
+  }
+  if(prog) prog.textContent = `${picked} / ${total} matches picked`;
+}
+
+async function savePlayoffPicks(){
+  if(new Date() >= PLAYOFF_DEADLINE){ toast('⏰ Playoff picks are locked','err'); return; }
+  const btn = document.getElementById('savePlayoffBtn');
+  btn.textContent = 'Saving…'; btn.disabled = true;
+  try{
+    const gs = calculateScore();
+    const ps = calculatePlayoffScore();
+    await db.collection('picks').doc(currentUser.id).set({
+      name: currentUser.name,
+      playoffPicks,
+      playoffScore: ps,
+      score: gs,
+      totalScore: gs + ps,
+      savedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge: true });
+    btn.textContent = '✅ Saved!';
+    toast('✅ Playoff picks saved!');
+    updateScore();
+    setTimeout(()=>{ btn.textContent='💾 Save Playoff Picks'; btn.disabled=false; }, 3000);
+  } catch(e){
+    toast('❌ Save failed — check connection','err');
+    btn.textContent='💾 Save Playoff Picks'; btn.disabled=false;
+  }
 }
 
 function completedCount(){ return Object.keys(GROUPS).filter(g => (picks[g]||[]).length===4).length; }
@@ -788,15 +1032,31 @@ async function adminSaveResults(){
 
 async function adminRecalcScores(){
   try{
+    // Fetch latest playoff results
+    const playoffDoc = await db.collection('results').doc('playoff').get();
+    const pBracket = playoffDoc.exists ? playoffDoc.data() : {};
+
     const snap = await db.collection('picks').get();
     const batch = db.batch();
     snap.forEach(doc => {
       const d = doc.data();
-      let total = 0;
+      // Group score
+      let gs = 0;
       for(const g of Object.keys(GROUPS)){
-        if(d.picks?.[g] && results[g]) total += scoreGroup(d.picks[g], results[g]);
+        if(d.picks?.[g] && results[g]) gs += scoreGroup(d.picks[g], results[g]);
       }
-      batch.update(doc.ref, { score: total });
+      // Playoff score
+      let ps = 0;
+      if(d.playoffPicks){
+        for(const round of PLAYOFF_ROUNDS){
+          const count = ROUND_COUNTS[round];
+          for(let i=0; i<count; i++){
+            const actual = pBracket[round]?.[i]?.winner;
+            if(actual && d.playoffPicks[`${round}-${i}`] === actual) ps += ROUND_PTS[round];
+          }
+        }
+      }
+      batch.update(doc.ref, { score: gs, playoffScore: ps, totalScore: gs + ps });
     });
     await batch.commit();
     toast('✅ Scores recalculated!');
@@ -808,7 +1068,9 @@ async function adminTogglePlayoff(){
   playoffUnlocked = !playoffUnlocked;
   await db.collection('settings').doc('global').set({ playoffUnlocked }, { merge:true });
   document.getElementById('playoffToggleBtn').textContent = playoffUnlocked ? '🔒 Lock Playoff Tab' : '🔓 Unlock Playoff Tab';
-  if(playoffUnlocked) applyPlayoffUnlock(); else {
+  if(playoffUnlocked){
+    await applyPlayoffUnlock();
+  } else {
     document.getElementById('tabBtn-playoffs').textContent = 'Playoffs 🔒';
     document.getElementById('playoffLocked').style.display = 'block';
     document.getElementById('playoffOpen').style.display = 'none';
