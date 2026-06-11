@@ -2,6 +2,11 @@
 // Fetches live FIFA World Cup 2026 standings + knockout bracket from ESPN
 // Writes to Firestore, recalculates all user scores.
 // Runs hourly via GitHub Actions.
+//
+// Group-stage scoring only awards points for a position once the team listed
+// in that position has actually played a game. This avoids handing out points
+// based on ESPN's tiebreak ordering of teams that are still tied 0-0-0-0
+// (which can also shift run-to-run for tied teams).
 
 const admin = require('firebase-admin');
 const https = require('https');
@@ -64,20 +69,28 @@ function fetchJSON(url) {
 }
 
 // ── Parse group standings ────────────────────────────────────────────────────
+// NOTE: also returns `gamesPlayedByGroup`, a map of
+//   { [groupLetter]: { [teamName]: gamesPlayed } }
+// so the scoring step can tell which positions are backed by an actual result.
 function parseStandings(data) {
   const results = {};
   const teamIdToName = {};
+  const gamesPlayedByGroup = {};
 
   for (const group of (data.children || [])) {
     const letter = group.name.replace('Group ', '');
     const entries = group.standings?.entries || group.entries || [];
 
-    // Build team ID → name lookup
+    // Build team ID → name lookup, and per-team gamesPlayed for this group
+    const gp = {};
     for (const e of entries) {
       if (e.team?.id && e.team?.displayName) {
         teamIdToName[String(e.team.id)] = mapName(e.team.displayName);
       }
+      const name = mapName(e.team?.displayName);
+      if (name) gp[name] = e.stats?.find(s => s.name === 'gamesPlayed')?.value || 0;
     }
+    gamesPlayedByGroup[letter] = gp;
 
     const gamesPlayed = entries.reduce((sum, e) => {
       return sum + (e.stats?.find(s => s.name === 'gamesPlayed')?.value || 0);
@@ -92,7 +105,7 @@ function parseStandings(data) {
     results[letter] = sorted.map(e => mapName(e.team?.displayName));
   }
 
-  return { results, teamIdToName };
+  return { results, teamIdToName, gamesPlayedByGroup };
 }
 
 // ── Fetch knockout bracket from ESPN ────────────────────────────────────────
@@ -161,16 +174,25 @@ async function fetchKnockoutBracket(teamIdToName) {
 }
 
 // ── Scoring ──────────────────────────────────────────────────────────────────
-function scoreGroup(userPicks, actual) {
+// `gp` is the gamesPlayed map for this group: { teamName: gamesPlayed }.
+// A position only scores once the team that actually landed there (`actual[i]`)
+// has played at least one game — otherwise that slot is still "TBD" and
+// contributes 0, regardless of what the user picked.
+function scoreGroup(userPicks, actual, gp = {}) {
   if (!actual || actual.length < 4) return 0;
   let pts = 0;
   const PTS = [4, 3, 2, 1];
+  const played = (team) => (gp[team] || 0) > 0;
+
   for (let i = 0; i < 4; i++) {
     if (!userPicks[i]) continue;
-    if (userPicks[i] === actual[i]) {
+    if (userPicks[i] === actual[i] && played(actual[i])) {
       pts += PTS[i];
     } else if (i < 2) {
-      if (actual[0] === userPicks[i] || actual[1] === userPicks[i]) pts += 2;
+      if (
+        (actual[0] === userPicks[i] && played(actual[0])) ||
+        (actual[1] === userPicks[i] && played(actual[1]))
+      ) pts += 2;
     }
   }
   return pts;
@@ -199,13 +221,19 @@ async function main() {
   const standingsData = await fetchJSON(
     'https://site.web.api.espn.com/apis/v2/sports/soccer/FIFA.WORLD/standings?season=2026'
   );
-  const { results, teamIdToName } = parseStandings(standingsData);
+  const { results, teamIdToName, gamesPlayedByGroup } = parseStandings(standingsData);
 
   if (Object.keys(results).length === 0) {
     console.log('No group results yet.');
   } else {
     console.log('Groups with results:', Object.keys(results).join(', '));
-    await db.collection('results').doc('groups').set(results, { merge: true });
+    // Store gamesPlayed alongside the standings under `_gamesPlayed` so the
+    // recalculation step below (and the frontend) can use it. `_gamesPlayed`
+    // doesn't collide with group letters A-L.
+    await db.collection('results').doc('groups').set(
+      { ...results, _gamesPlayed: gamesPlayedByGroup },
+      { merge: true }
+    );
     console.log('Group results written.');
   }
 
@@ -235,6 +263,7 @@ async function main() {
 
   const groupsDoc  = await db.collection('results').doc('groups').get();
   const allResults = groupsDoc.exists ? groupsDoc.data() : {};
+  const allGamesPlayed = allResults._gamesPlayed || {};
   const playoffDoc = await db.collection('results').doc('playoff').get();
   const allBracket = playoffDoc.exists ? playoffDoc.data() : {};
 
@@ -243,7 +272,7 @@ async function main() {
     const d = doc.data();
     let gs = 0;
     for (const g of Object.keys(GROUPS)) {
-      if (d.picks?.[g] && allResults[g]) gs += scoreGroup(d.picks[g], allResults[g]);
+      if (d.picks?.[g] && allResults[g]) gs += scoreGroup(d.picks[g], allResults[g], allGamesPlayed[g]);
     }
     const ps = d.playoffPicks ? scorePlayoffs(d.playoffPicks, allBracket) : 0;
     batch.update(doc.ref, { score: gs, playoffScore: ps, totalScore: gs + ps });

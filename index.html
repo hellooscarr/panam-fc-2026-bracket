@@ -635,17 +635,18 @@ function toggleTeam(group, team){
 }
 
 // ════════════════════ SCORING ════════════════════
-function scoreGroup(userPicks, actual){
+function scoreGroup(userPicks, actual, gp = {}){
   if(!actual || actual.length < 4) return 0;
   let pts = 0;
   const PTS = [4,3,2,1];
+  const played = (team) => (gp[team] || 0) > 0; // only score a slot once that team has actually played
   for(let i=0;i<4;i++){
     if(!userPicks[i]) continue;
-    if(userPicks[i] === actual[i]){
+    if(userPicks[i] === actual[i] && played(actual[i])){
       pts += PTS[i]; // exact match
     } else if(i < 2){
       // picked for top 2 — did they actually advance?
-      if(actual[0] === userPicks[i] || actual[1] === userPicks[i]) pts += 2;
+      if((actual[0] === userPicks[i] && played(actual[0])) || (actual[1] === userPicks[i] && played(actual[1]))) pts += 2;
     }
   }
   return pts;
@@ -653,8 +654,9 @@ function scoreGroup(userPicks, actual){
 
 function calculateScore(){
   let total = 0;
+  const gpAll = results._gamesPlayed || {};
   for(const g of Object.keys(GROUPS)){
-    if(picks[g] && results[g]) total += scoreGroup(picks[g], results[g]);
+    if(picks[g] && results[g]) total += scoreGroup(picks[g], results[g], gpAll[g]);
   }
   return total;
 }
@@ -1038,12 +1040,13 @@ async function adminRecalcScores(){
 
     const snap = await db.collection('picks').get();
     const batch = db.batch();
+    const gpAll = results._gamesPlayed || {};
     snap.forEach(doc => {
       const d = doc.data();
       // Group score
       let gs = 0;
       for(const g of Object.keys(GROUPS)){
-        if(d.picks?.[g] && results[g]) gs += scoreGroup(d.picks[g], results[g]);
+        if(d.picks?.[g] && results[g]) gs += scoreGroup(d.picks[g], results[g], gpAll[g]);
       }
       // Playoff score
       let ps = 0;
