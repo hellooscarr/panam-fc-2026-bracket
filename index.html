@@ -279,6 +279,25 @@
     .lb-score-lbl { font-size: 9px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.3px; margin-top: 2px; }
     .lb-divider { width: 1px; height: 28px; background: var(--border); flex-shrink: 0; }
 
+    /* ── LIVE SCORES ── */
+    .score-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 10px; overflow: hidden; }
+    .score-status { font-size: 10px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.5px; padding: 9px 12px 0; display: flex; justify-content: space-between; align-items: center; }
+    .score-status.live { color: var(--green); font-weight: 800; }
+    .score-status.final { color: var(--accent); font-weight: 800; }
+    .score-group-tag { font-size: 10px; color: var(--dim); font-weight: 700; }
+    .score-teams { padding: 6px 12px 12px; }
+    .score-team-row { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; }
+    .score-team-info { display: flex; align-items: center; gap: 9px; }
+    .score-flag { font-size: 22px; line-height: 1; }
+    .score-team-name { font-size: 13px; font-weight: 600; }
+    .score-val { font-size: 18px; font-weight: 900; color: var(--accent); min-width: 20px; text-align: right; }
+    .live-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--red); margin-right: 5px; animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.25; } }
+    .scores-updated { text-align: center; font-size: 11px; color: var(--dim); margin: 6px 0 18px; }
+    .scores-date { font-size: 14px; font-weight: 800; color: #fff; text-align: center; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+    .scores-group-header { font-size: 11px; font-weight: 800; color: var(--accent); text-transform: uppercase; letter-spacing: 1.5px; margin: 16px 0 8px; }
+    .scores-group-header:first-of-type { margin-top: 0; }
+
     @media (min-width: 501px) {
       body { border-left: 1px solid var(--border); border-right: 1px solid var(--border); box-shadow: 0 0 60px rgba(0,0,0,0.5); }
     }
@@ -329,6 +348,7 @@
     <button class="tab-btn active" id="tabBtn-groups"    onclick="showTab('groups')">Groups</button>
     <button class="tab-btn"        id="tabBtn-playoffs"  onclick="showTab('playoffs')">Playoffs 🔒</button>
     <button class="tab-btn"        id="tabBtn-leaderboard" onclick="showTab('leaderboard')">Leaderboard</button>
+    <button class="tab-btn"        id="tabBtn-scores"    onclick="showTab('scores')">Scores</button>
   </div>
 
   <div class="banner" id="deadlineBanner"></div>
@@ -378,6 +398,12 @@
   <div id="pane-leaderboard" class="tab-pane" style="display:none">
     <div class="section-label">Standings</div>
     <div id="lbContainer"><div class="empty">Loading...</div></div>
+  </div>
+
+  <!-- ── SCORES TAB ── -->
+  <div id="pane-scores" class="tab-pane" style="display:none">
+    <div class="section-label">Live &amp; Recent Matches</div>
+    <div id="scoresContainer"><div class="empty">Loading...</div></div>
   </div>
 
   <!-- Save bar (shown only on groups tab) -->
@@ -473,6 +499,44 @@ const ROUND_LABELS     = {R32:'Round of 32', R16:'Round of 16', QF:'Quarterfinal
 const ROUND_PTS        = {R32:1, R16:2, QF:3, SF:4, F:5};
 const ROUND_COUNTS     = {R32:16, R16:8, QF:4, SF:2, F:1};
 const PLAYOFF_DEADLINE = new Date("2026-06-28T15:00:00Z"); // 1 hr before first R32 game
+
+// ── Live Scores Constants ──
+const ESPN_SCOREBOARD_URL = 'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard';
+const ESPN_NAME_MAP = {
+  'South Korea':'Korea Republic',
+  'Bosnia and Herzegovina':'Bosnia & Herzegovina',
+  'United States':'USA',
+  'Ivory Coast':"Côte d'Ivoire",
+  'Iran':'IR Iran',
+  'Cape Verde':'Cabo Verde',
+  'Czech Republic':'Czechia'
+};
+let liveScoresInterval = null;
+
+// Build team -> group lookup (used to group live scores by World Cup group)
+const TEAM_GROUP = {};
+for(const [letter, teams] of Object.entries(GROUPS)){
+  teams.forEach(t => TEAM_GROUP[t] = letter);
+}
+
+// ESPN "season.type" IDs -> playoff round codes (used to group live scores by knockout round)
+const ESPN_ROUND_TYPES     = { 13801:'R32', 13800:'R16', 13799:'QF', 13798:'SF', 13797:'F' };
+const ROUND_DISPLAY_LABELS = { R32:'Round of 32', R16:'Round of 16', QF:'Quarterfinals', SF:'Semifinals', F:'Championship' };
+const PLAYOFF_ROUND_ORDER  = ['R32','R16','QF','SF','F'];
+
+// Sort order within each section: live matches first, then most-recently-finished,
+// then upcoming matches soonest-first.
+function getMatchSortKey(e){
+  const status = e.competitions?.[0]?.status || {};
+  const state = status.type?.state; // 'pre' | 'in' | 'post'
+  const t = new Date(e.date).getTime();
+  if(state === 'in')   return [0, -t]; // live first
+  if(state === 'post') return [1, -t]; // most recent final first
+  return [2, t];                        // soonest upcoming first
+}
+function sortAndJoin(items){
+  return items.sort((a,b) => a.key[0]-b.key[0] || a.key[1]-b.key[1]).map(i => i.html).join('');
+}
 
 // ── App State ──
 let db, currentUser;
@@ -617,6 +681,124 @@ async function loadLeaderboard(){
       totalScore: calculateScore() + calculatePlayoffScore()
     }] : []);
   }
+}
+
+// ════════════════════ LIVE SCORES ════════════════════
+function mapEspnTeamName(name){
+  return ESPN_NAME_MAP[name] || name;
+}
+
+async function loadLiveScores(){
+  const c = document.getElementById('scoresContainer');
+  try{
+    const res = await fetch(ESPN_SCOREBOARD_URL);
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    const events = data.events || [];
+    renderLiveScores(events);
+
+    const hasLive = events.some(e => e.competitions?.[0]?.status?.type?.state === 'in');
+    if(hasLive && !liveScoresInterval){
+      liveScoresInterval = setInterval(()=>{
+        const pane = document.getElementById('pane-scores');
+        if(pane && pane.style.display !== 'none') loadLiveScores();
+        else { clearInterval(liveScoresInterval); liveScoresInterval = null; }
+      }, 60000);
+    } else if(!hasLive && liveScoresInterval){
+      clearInterval(liveScoresInterval);
+      liveScoresInterval = null;
+    }
+  } catch(e){
+    c.innerHTML = '<div class="empty">Unable to load live scores right now.<br>Check your connection and try again.</div>';
+  }
+}
+
+function renderLiveScores(events){
+  const c = document.getElementById('scoresContainer');
+  if(!events.length){
+    c.innerHTML = '<div class="empty">No matches scheduled today.</div>';
+    return;
+  }
+
+  const dateHeader = new Date(events[0].date).toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' });
+  const groupedGroups = {};  // { A: [{key,html},...], B: [...], ... }
+  const groupedRounds = {};  // { R32: [{key,html},...], R16: [...], ... }
+  const other = [];          // anything unrecognized
+
+  events.forEach(e => {
+    const comp   = e.competitions?.[0];
+    const status = comp?.status || {};
+    const state  = status.type?.state; // 'pre' | 'in' | 'post'
+    const home   = comp?.competitors?.find(x => x.homeAway === 'home');
+    const away   = comp?.competitors?.find(x => x.homeAway === 'away');
+    if(!home || !away) return;
+
+    const homeName = mapEspnTeamName(home.team.displayName);
+    const awayName = mapEspnTeamName(away.team.displayName);
+
+    let statusHTML, statusCls = '';
+    if(state === 'in'){
+      statusHTML = `<span class="live-dot"></span>LIVE · ${status.type?.shortDetail || ''}`;
+      statusCls = 'live';
+    } else if(state === 'post'){
+      statusHTML = 'FINAL';
+      statusCls = 'final';
+    } else {
+      const d = new Date(e.date);
+      statusHTML = d.toLocaleString('en-US', { hour:'numeric', minute:'2-digit' });
+    }
+
+    const teamRow = (name, score) => `
+      <div class="score-team-row">
+        <div class="score-team-info">
+          <span class="score-flag">${FLAGS[name] || '🏳️'}</span>
+          <span class="score-team-name">${name}</span>
+        </div>
+        <span class="score-val">${state === 'pre' ? '' : (score ?? '0')}</span>
+      </div>`;
+
+    const cardHtml = `<div class="score-card">
+      <div class="score-status ${statusCls}">
+        <span>${statusHTML}</span>
+      </div>
+      <div class="score-teams">
+        ${teamRow(homeName, home.score)}
+        ${teamRow(awayName, away.score)}
+      </div>
+    </div>`;
+
+    const seasonType = e.season?.type;
+    const round = ESPN_ROUND_TYPES[seasonType];
+    const item = { key: getMatchSortKey(e), html: cardHtml };
+
+    if(round){
+      (groupedRounds[round] = groupedRounds[round] || []).push(item);
+    } else {
+      const grp = TEAM_GROUP[homeName] || TEAM_GROUP[awayName];
+      if(grp) (groupedGroups[grp] = groupedGroups[grp] || []).push(item);
+      else other.push(item);
+    }
+  });
+
+  let html = `<div class="scores-date">${dateHeader}</div>`;
+
+  // Playoff matches first, most-advanced round on top (Championship -> ... -> Round of 32);
+  // each round's matches sorted live-first, then most-recent-final-first, then soonest-upcoming
+  PLAYOFF_ROUND_ORDER.slice().reverse().forEach(round => {
+    if(groupedRounds[round]){
+      html += `<div class="scores-group-header">${ROUND_DISPLAY_LABELS[round]}</div>` + sortAndJoin(groupedRounds[round]);
+    }
+  });
+
+  // Group-stage matches below, alphabetical by group; each group's matches sorted the same way
+  Object.keys(groupedGroups).sort().forEach(letter => {
+    html += `<div class="scores-group-header">Group ${letter}</div>` + sortAndJoin(groupedGroups[letter]);
+  });
+
+  if(other.length) html += `<div class="scores-group-header">Other Matches</div>` + sortAndJoin(other);
+
+  const updated = new Date().toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit' });
+  c.innerHTML = html + `<div class="scores-updated">Updated ${updated} · Source: ESPN</div>`;
 }
 
 // ════════════════════ PICKS LOGIC ════════════════════
@@ -796,12 +978,13 @@ function renderLeaderboard(rows){
 
 // ════════════════════ UI HELPERS ════════════════════
 function showTab(tab){
-  ['groups','playoffs','leaderboard'].forEach(t => {
+  ['groups','playoffs','leaderboard','scores'].forEach(t => {
     document.getElementById('pane-' + t).style.display = t === tab ? 'block' : 'none';
     document.getElementById('tabBtn-' + t).classList.toggle('active', t === tab);
   });
   document.getElementById('saveBar').style.display = tab === 'groups' ? 'block' : 'none';
   if(tab === 'leaderboard') loadLeaderboard();
+  if(tab === 'scores') loadLiveScores();
 }
 
 function updateProgress(){
