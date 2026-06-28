@@ -557,6 +557,7 @@ db = firebase.firestore();
   const saved = localStorage.getItem('wc2026_user');
   if(saved){ currentUser = JSON.parse(saved); initApp(); }
   if(window.location.hash === '#admin') setTimeout(showAdminLogin, 500);
+  playoffUnlocked = true;
 })();
 
 // ════════════════════ AUTH ════════════════════
