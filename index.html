@@ -607,7 +607,7 @@ async function loadSettings(){
     const doc = await db.collection('settings').doc('global').get();
     if(doc.exists){
       const d = doc.data();
-      playoffUnlocked = d.playoffUnlocked || true;
+      playoffUnlocked = d.playoffUnlocked ?? true;
       if(playoffUnlocked) await applyPlayoffUnlock();
     }
   } catch(e){ console.warn('Settings offline:', e.message); }
