@@ -536,7 +536,7 @@ const PLAYOFF_ROUNDS   = ['R32','R16','QF','SF','F'];
 const ROUND_LABELS     = {R32:'Round of 32', R16:'Round of 16', QF:'Quarterfinals', SF:'Semifinals', F:'⚽ Final'};
 const ROUND_PTS        = {R32:1, R16:2, QF:3, SF:4, F:5};
 const ROUND_COUNTS     = {R32:16, R16:8, QF:4, SF:2, F:1};
-const PLAYOFF_DEADLINE = new Date("2026-06-28T15:00:00Z"); // 1 hr before first R32 game
+const PLAYOFF_DEADLINE = new Date(Date.UTC(2026, 5, 29, 17, 0, 0)); // Jun 29 noon CT
 
 // ── App State ──
 let db, currentUser;
