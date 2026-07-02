@@ -401,8 +401,8 @@ onkeydown="if(event.key==='Enter')login()" />
 
 <div class="tabs">
 <button class="tab-btn active" id="tabBtn-groups"      onclick="showTab('groups')">Groups</button>
+<button class="tab-btn"        <button class="tab-btn"        id="tabBtn-playoffs"    onclick="showTab('playoffs')">Playoffs 🔒</button>
 <button class="tab-btn"        id="tabBtn-schedule"    onclick="showTab('schedule')">Schedule</button>
-<button class="tab-btn"        id="tabBtn-playoffs"    onclick="showTab('playoffs')">Playoffs 🔒</button>
 <button class="tab-btn"        id="tabBtn-leaderboard" onclick="showTab('leaderboard')">Standings</button>
 </div>
 
@@ -444,7 +444,7 @@ Playoff picks open once the group stage is complete and FIFA confirms the Round 
 </div>
 <div id="playoffOpen" style="display:none">
 <div class="scoring-info">
-🏆 <strong>Playoff Scoring:</strong> R32=1pt · R16=2pts · QF=3pts · SF=4pts · Final=5pts — pick winners all the way through!
+🏆 <strong>Playoff Scoring:</strong> R32=2pts · R16=3pts · QF=5pts · SF=8pts · Final=13pts — pick winners all the way through!
 </div>
 <div id="playoffBracketContainer"></div>
 <div class="playoff-save-wrap">
@@ -657,6 +657,8 @@ setTimeout(()=>{ logoTaps=0; }, 2000);
 await Promise.all([loadSettings(), loadUserPicks(), loadResults()]);
 // Always load playoff bracket so Schedule tab can show results even if tab is locked
 await loadPlayoffBracket();
+if(playoffUnlocked) applyPlayoffUnlockUI();
+renderPlayoffBracket();
 renderGroups();
 updateProgress();
 updateBanner();
@@ -681,7 +683,6 @@ function applyPlayoffUnlockUI(){
 document.getElementById('tabBtn-playoffs').textContent = 'Playoffs';
 document.getElementById('playoffLocked').style.display = 'none';
 document.getElementById('playoffOpen').style.display = 'block';
-renderPlayoffBracket();
 }
 
 async function loadPlayoffBracket(){
