@@ -401,7 +401,7 @@ onkeydown="if(event.key==='Enter')login()" />
 
 <div class="tabs">
 <button class="tab-btn active" id="tabBtn-groups"      onclick="showTab('groups')">Groups</button>
-<button class="tab-btn"        <button class="tab-btn"        id="tabBtn-playoffs"    onclick="showTab('playoffs')">Playoffs 🔒</button>
+<button class="tab-btn"        id="tabBtn-playoffs"    onclick="showTab('playoffs')">Playoffs 🔒</button>
 <button class="tab-btn"        id="tabBtn-schedule"    onclick="showTab('schedule')">Schedule</button>
 <button class="tab-btn"        id="tabBtn-leaderboard" onclick="showTab('leaderboard')">Standings</button>
 </div>
@@ -597,7 +597,7 @@ const R32_SCHEDULE = [
 // ── Playoff Constants ──
 const PLAYOFF_ROUNDS = ['R32','R16','QF','SF','F'];
 const ROUND_LABELS = {R32:'Round of 32', R16:'Round of 16', QF:'Quarterfinals', SF:'Semifinals', F:'⚽ Final'};
-const ROUND_PTS = {R32:1, R16:2, QF:3, SF:4, F:5};
+const ROUND_PTS = {R32:2, R16:3, QF:5, SF:8, F:13};
 const ROUND_COUNTS = {R32:16, R16:8, QF:4, SF:2, F:1};
 const PLAYOFF_DEADLINE = new Date(Date.UTC(2026, 5, 29, 17, 0, 0)); // Jun 29 noon CT
 
