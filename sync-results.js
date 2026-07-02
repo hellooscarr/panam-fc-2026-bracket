@@ -13,12 +13,12 @@ const https = require('https');
 
 // ── Name mapping: ESPN display names → app names ─────────────────────────────
 const NAME_MAP = {
-  'South Korea':        'Korea Republic',
+  'South Korea': 'Korea Republic',
   'Bosnia-Herzegovina': 'Bosnia & Herzegovina',
-  'United States':      'USA',
-  'Ivory Coast':        "Côte d'Ivoire",
-  'Iran':               'IR Iran',
-  'Cape Verde':         'Cabo Verde',
+  'United States': 'USA',
+  'Ivory Coast': "Côte d'Ivoire",
+  'Iran': 'IR Iran',
+  'Cape Verde': 'Cabo Verde',
 };
 
 // ── App's group definitions ──────────────────────────────────────────────────
@@ -39,8 +39,8 @@ const GROUPS = {
 
 // ── Playoff constants ────────────────────────────────────────────────────────
 const PLAYOFF_ROUNDS = ['R32','R16','QF','SF','F'];
-const ROUND_COUNTS   = {R32:16, R16:8, QF:4, SF:2, F:1};
-const ROUND_PTS      = {R32:1, R16:2, QF:3, SF:4, F:5};
+const ROUND_COUNTS = {R32:16, R16:8, QF:4, SF:2, F:1};
+const ROUND_PTS = {R32:1, R16:2, QF:3, SF:4, F:5};
 
 // ESPN season type IDs for each knockout round
 const ESPN_ROUND_TYPES = {
@@ -50,6 +50,73 @@ const ESPN_ROUND_TYPES = {
   SF:  13798,
   F:   13797,
 };
+
+// ── Correct R32 bracket order — MUST match R32_BRACKET in index.html exactly ──
+// ESPN returns matches in chronological order; we reorder them so that
+// bracket.R32[i] always corresponds to picks key "R32-i" from the app.
+const R32_BRACKET_ORDER = [
+  { home: 'Germany',            away: 'Paraguay'            }, // [0]
+  { home: 'France',             away: 'Sweden'              }, // [1]
+  { home: 'South Africa',       away: 'Canada'              }, // [2]
+  { home: 'Netherlands',        away: 'Morocco'             }, // [3]
+  { home: 'Portugal',           away: 'Croatia'             }, // [4]
+  { home: 'Spain',              away: 'Austria'             }, // [5]
+  { home: 'USA',                away: 'Bosnia & Herzegovina'}, // [6]
+  { home: 'Belgium',            away: 'Senegal'             }, // [7]
+  { home: 'Brazil',             away: 'Japan'               }, // [8]
+  { home: "Côte d'Ivoire",      away: 'Norway'              }, // [9]
+  { home: 'Mexico',             away: 'Ecuador'             }, // [10]
+  { home: 'England',            away: 'Congo DR'            }, // [11]
+  { home: 'Argentina',          away: 'Cabo Verde'          }, // [12]
+  { home: 'Australia',          away: 'Egypt'               }, // [13]
+  { home: 'Switzerland',        away: 'Algeria'             }, // [14]
+  { home: 'Colombia',           away: 'Ghana'               }, // [15]
+];
+
+// Reorder a raw ESPN bracket so match indices align with the app's R32_BRACKET_ORDER
+// and the derived R16/QF/SF/F bracket progression (pairs of adjacent R32 winners play).
+function reorderPlayoffBracket(rawBracket) {
+  const ordered = {};
+
+  // ── R32: map each ESPN match to its correct slot by team names ──
+  const r32 = R32_BRACKET_ORDER.map(def => ({ ...def, winner: null }));
+  for (const m of (rawBracket.R32 || [])) {
+    const idx = R32_BRACKET_ORDER.findIndex(b =>
+      (b.home === m.home && b.away === m.away) ||
+      (b.home === m.away && b.away === m.home)
+    );
+    if (idx !== -1) r32[idx].winner = m.winner || null;
+    else console.warn(`  R32 match not found in bracket order: ${m.home} vs ${m.away}`);
+  }
+  ordered.R32 = r32;
+
+  // ── R16, QF, SF, F: derive expected matchups from previous round winners ──
+  // winner of slot 2i plays winner of slot 2i+1 — same progression the app uses.
+  let prev = r32;
+  for (const round of ['R16', 'QF', 'SF', 'F']) {
+    const count = prev.length / 2;
+    const expected = Array.from({ length: count }, (_, i) => ({
+      home:   prev[i * 2].winner     || null,
+      away:   prev[i * 2 + 1].winner || null,
+      winner: null,
+    }));
+    // Match each ESPN result to the correct slot by team names
+    for (const m of (rawBracket[round] || [])) {
+      const idx = expected.findIndex(e =>
+        e.home && e.away && (
+          (e.home === m.home && e.away === m.away) ||
+          (e.home === m.away && e.away === m.home)
+        )
+      );
+      if (idx !== -1) expected[idx].winner = m.winner || null;
+      else console.warn(`  ${round} match not matched: ${m.home} vs ${m.away}`);
+    }
+    ordered[round] = expected;
+    prev = expected;
+  }
+
+  return ordered;
+}
 
 function mapName(name) {
   return NAME_MAP[name] || name;
@@ -69,9 +136,6 @@ function fetchJSON(url) {
 }
 
 // ── Parse group standings ────────────────────────────────────────────────────
-// NOTE: also returns `gamesPlayedByGroup`, a map of
-//   { [groupLetter]: { [teamName]: gamesPlayed } }
-// so the scoring step can tell which positions are backed by an actual result.
 function parseStandings(data) {
   const results = {};
   const teamIdToName = {};
@@ -81,7 +145,6 @@ function parseStandings(data) {
     const letter = group.name.replace('Group ', '');
     const entries = group.standings?.entries || group.entries || [];
 
-    // Build team ID → name lookup, and per-team gamesPlayed for this group
     const gp = {};
     for (const e of entries) {
       if (e.team?.id && e.team?.displayName) {
@@ -132,7 +195,6 @@ async function fetchKnockoutBracket(teamIdToName) {
           if (!ref) continue;
           const ev = await fetchJSON(ref);
 
-          // Parse teams from event name: "AwayTeam at HomeTeam"
           let home = '', away = '';
           const evName = ev.name || '';
           if (evName.includes(' at ')) {
@@ -141,7 +203,6 @@ async function fetchKnockoutBracket(teamIdToName) {
             home = mapName(parts[1].trim());
           }
 
-          // Use competitor IDs as fallback / for winner detection
           const comps = ev.competitions?.[0]?.competitors || [];
           let winner = null;
           for (const comp of comps) {
@@ -153,11 +214,10 @@ async function fetchKnockoutBracket(teamIdToName) {
             if (comp.winner === true && tName) winner = tName;
           }
 
-          if (!home && !away) continue; // bracket not set
-
+          if (!home && !away) continue;
           matches.push({ home: home || 'TBD', away: away || 'TBD', winner: winner || null });
         } catch(e) {
-          console.warn(`    Event fetch error: ${e.message}`);
+          console.warn(`  Event fetch error: ${e.message}`);
         }
       }
 
@@ -174,10 +234,6 @@ async function fetchKnockoutBracket(teamIdToName) {
 }
 
 // ── Scoring ──────────────────────────────────────────────────────────────────
-// `gp` is the gamesPlayed map for this group: { teamName: gamesPlayed }.
-// A position only scores once the team that actually landed there (`actual[i]`)
-// has played at least one game — otherwise that slot is still "TBD" and
-// contributes 0, regardless of what the user picked.
 function scoreGroup(userPicks, actual, gp = {}) {
   if (!actual || actual.length < 4) return 0;
   let pts = 0;
@@ -227,9 +283,6 @@ async function main() {
     console.log('No group results yet.');
   } else {
     console.log('Groups with results:', Object.keys(results).join(', '));
-    // Store gamesPlayed alongside the standings under `_gamesPlayed` so the
-    // recalculation step below (and the frontend) can use it. `_gamesPlayed`
-    // doesn't collide with group letters A-L.
     await db.collection('results').doc('groups').set(
       { ...results, _gamesPlayed: gamesPlayedByGroup },
       { merge: true }
@@ -239,15 +292,20 @@ async function main() {
 
   // ── 2. Knockout bracket ──
   console.log('Fetching knockout bracket...');
-  const bracket = await fetchKnockoutBracket(teamIdToName);
+  const rawBracket = await fetchKnockoutBracket(teamIdToName);
 
-  if (Object.keys(bracket).length > 0) {
-    await db.collection('results').doc('playoff').set(bracket, { merge: true });
+  if (Object.keys(rawBracket).length > 0) {
+    // Reorder so bracket indices match the app's pick keys (R32-0, R32-1, ...)
+    const orderedBracket = reorderPlayoffBracket(rawBracket);
+    console.log('Reordered bracket to match app indices.');
+
+    // Write full ordered bracket (no merge — always use fresh ordered data)
+    await db.collection('results').doc('playoff').set(orderedBracket);
     console.log('Playoff bracket written.');
 
     // Auto-unlock when full R32 bracket is set with real teams
-    if (bracket.R32 && bracket.R32.length >= 16) {
-      const allKnown = bracket.R32.every(m => m.home !== 'TBD' && m.away !== 'TBD');
+    if (orderedBracket.R32 && orderedBracket.R32.length >= 16) {
+      const allKnown = orderedBracket.R32.every(m => m.home !== 'TBD' && m.away !== 'TBD');
       if (allKnown) {
         await db.collection('settings').doc('global').set({ playoffUnlocked: true }, { merge: true });
         console.log('Playoff tab auto-unlocked — R32 is set!');
@@ -261,7 +319,7 @@ async function main() {
   const snap = await db.collection('picks').get();
   if (snap.empty) { console.log('No picks yet.'); return; }
 
-  const groupsDoc  = await db.collection('results').doc('groups').get();
+  const groupsDoc = await db.collection('results').doc('groups').get();
   const allResults = groupsDoc.exists ? groupsDoc.data() : {};
   const allGamesPlayed = allResults._gamesPlayed || {};
   const playoffDoc = await db.collection('results').doc('playoff').get();
