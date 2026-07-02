@@ -1,1173 +1,1067 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>PANAM FC 2026 World Cup Bracket</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>PANAM FC 2026 World Cup Bracket</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
-    :root {
-      --bg: #020F2A;
-      --surface: #0A1F44;
-      --surface2: #0F2860;
-      --accent: #C9AA71;
-      --accent-dim: rgba(201,170,113,0.12);
-      --green: #27AE60;
-      --red: #E74C3C;
-      --text: #FFFFFF;
-      --dim: #7A9CC0;
-      --border: #1A3560;
-      --orange: #F39C12;
-    }
+:root {
+--bg: #020F2A;
+--surface: #0A1F44;
+--surface2: #0F2860;
+--accent: #C9AA71;
+--accent-dim: rgba(201,170,113,0.12);
+--green: #27AE60;
+--red: #E74C3C;
+--text: #FFFFFF;
+--dim: #7A9CC0;
+--border: #1A3560;
+--orange: #F39C12;
+}
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      max-width: 500px;
-      margin: 0 auto;
-    }
+body {
+font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+background: var(--bg);
+color: var(--text);
+min-height: 100vh;
+max-width: 500px;
+margin: 0 auto;
+}
 
-    /* ── LOGIN ── */
-    #loginScreen {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-    }
-    .login-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 40px 24px 32px;
-      width: 100%;
-      text-align: center;
-    }
-    .login-wordmark { font-family: 'Bebas Neue', Impact, 'Franklin Gothic Heavy', sans-serif; font-size: 72px; color: var(--accent); letter-spacing: 6px; line-height: 1; margin-bottom: 4px; }
-    .login-title { font-size: 12px; font-weight: 700; color: var(--dim); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 28px; }
-    .field-label { display: block; font-size: 11px; color: var(--dim); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; text-align: left; }
-    .field-wrap { margin-bottom: 16px; }
-    input[type="text"], input[type="password"] {
-      width: 100%; background: var(--bg); border: 1.5px solid var(--border);
-      border-radius: 10px; padding: 13px 16px; color: var(--text); font-size: 16px;
-      outline: none; transition: border-color 0.2s;
-    }
-    input:focus { border-color: var(--accent); }
-    .btn { width: 100%; background: var(--accent); color: var(--bg); border: none; border-radius: 10px; padding: 15px; font-size: 16px; font-weight: 700; cursor: pointer; transition: opacity 0.2s; }
-    .btn:hover { opacity: 0.88; }
-    .btn:disabled { background: var(--border); color: var(--dim); cursor: default; opacity: 1; }
-    .btn-ghost { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
-    .err { color: var(--red); font-size: 13px; margin-top: 10px; min-height: 18px; }
-    .login-hint { font-size: 11px; color: var(--dim); margin-top: 18px; }
+/* ââ LOGIN ââ */
+#loginScreen {
+min-height: 100vh;
+display: flex;
+align-items: center;
+justify-content: center;
+padding: 24px;
+}
+.login-card {
+background: var(--surface);
+border: 1px solid var(--border);
+border-radius: 20px;
+padding: 40px 24px 32px;
+width: 100%;
+text-align: center;
+}
+.login-wordmark { font-family: 'Bebas Neue', Impact, 'Franklin Gothic Heavy', sans-serif; font-size: 72px; color: var(--accent); letter-spacing: 6px; line-height: 1; margin-bottom: 4px; }
+.login-title { font-size: 12px; font-weight: 700; color: var(--dim); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 28px; }
+.field-label { display: block; font-size: 11px; color: var(--dim); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; text-align: left; }
+.field-wrap { margin-bottom: 16px; }
+input[type="text"], input[type="password"] {
+width: 100%; background: var(--bg); border: 1.5px solid var(--border);
+border-radius: 10px; padding: 13px 16px; color: var(--text); font-size: 16px;
+outline: none; transition: border-color 0.2s;
+}
+input:focus { border-color: var(--accent); }
+.btn { width: 100%; background: var(--accent); color: var(--bg); border: none; border-radius: 10px; padding: 15px; font-size: 16px; font-weight: 700; cursor: pointer; transition: opacity 0.2s; }
+.btn:hover { opacity: 0.88; }
+.btn:disabled { background: var(--border); color: var(--dim); cursor: default; opacity: 1; }
+.btn-ghost { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+.err { color: var(--red); font-size: 13px; margin-top: 10px; min-height: 18px; }
+.login-hint { font-size: 11px; color: var(--dim); margin-top: 18px; }
 
-    /* ── HEADER ── */
-    #mainApp { display: none; }
-    header {
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      padding: 10px 16px;
-      display: flex; align-items: center; justify-content: space-between;
-      position: sticky; top: 0; z-index: 200;
-    }
-    .hd-left { display: flex; align-items: center; gap: 10px; }
-    .hd-wordmark { font-family: 'Bebas Neue', Impact, 'Franklin Gothic Heavy', sans-serif; font-size: 26px; color: var(--accent); letter-spacing: 3px; line-height: 1; }
-    .hd-sub { font-size: 10px; color: var(--dim); letter-spacing: 0.5px; }
-    .hd-right { display: flex; align-items: center; gap: 8px; }
-    .hd-name { font-size: 13px; color: var(--dim); }
-    .hd-score { background: var(--accent); color: var(--bg); font-size: 12px; font-weight: 800; padding: 3px 10px; border-radius: 20px; }
+/* ââ HEADER ââ */
+#mainApp { display: none; }
+header {
+background: var(--surface);
+border-bottom: 1px solid var(--border);
+padding: 10px 16px;
+display: flex; align-items: center; justify-content: space-between;
+position: sticky; top: 0; z-index: 200;
+}
+.hd-left { display: flex; align-items: center; gap: 10px; }
+.hd-wordmark { font-family: 'Bebas Neue', Impact, 'Franklin Gothic Heavy', sans-serif; font-size: 26px; color: var(--accent); letter-spacing: 3px; line-height: 1; }
+.hd-sub { font-size: 10px; color: var(--dim); letter-spacing: 0.5px; }
+.hd-right { display: flex; align-items: center; gap: 8px; }
+.hd-name { font-size: 13px; color: var(--dim); }
+.hd-score { background: var(--accent); color: var(--bg); font-size: 12px; font-weight: 800; padding: 3px 10px; border-radius: 20px; }
 
-    /* ── TABS ── */
-    .tabs {
-      background: var(--surface); border-bottom: 1px solid var(--border);
-      display: flex; position: sticky; top: 53px; z-index: 199;
-    }
-    .tab-btn {
-      flex: 1; background: none; border: none; border-bottom: 2px solid transparent;
-      color: var(--dim); padding: 11px 6px; font-size: 13px; font-weight: 600;
-      cursor: pointer; transition: all 0.2s;
-    }
-    .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+/* ââ TABS ââ */
+.tabs {
+background: var(--surface); border-bottom: 1px solid var(--border);
+display: flex; position: sticky; top: 53px; z-index: 199;
+}
+.tab-btn {
+flex: 1; background: none; border: none; border-bottom: 2px solid transparent;
+color: var(--dim); padding: 11px 4px; font-size: 12px; font-weight: 600;
+cursor: pointer; transition: all 0.2s;
+}
+.tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
 
-    /* ── BANNER ── */
-    .banner {
-      background: linear-gradient(90deg, #b8952a, #C9AA71);
-      color: var(--bg); font-size: 12px; font-weight: 700;
-      text-align: center; padding: 8px 16px; letter-spacing: 0.3px;
-    }
-    .banner.locked { background: linear-gradient(90deg, #c0392b, #e74c3c); color: #fff; }
+/* ââ BANNER ââ */
+.banner {
+background: linear-gradient(90deg, #b8952a, #C9AA71);
+color: var(--bg); font-size: 12px; font-weight: 700;
+text-align: center; padding: 8px 16px; letter-spacing: 0.3px;
+}
+.banner.locked { background: linear-gradient(90deg, #c0392b, #e74c3c); color: #fff; }
 
-    /* ── TAB CONTENT ── */
-    .tab-pane { padding: 14px 14px 100px; }
+/* ââ TAB CONTENT ââ */
+.tab-pane { padding: 14px 14px 100px; }
 
-    /* ── PROGRESS ── */
-    .progress-row { display: flex; justify-content: space-between; font-size: 12px; color: var(--dim); margin-bottom: 7px; }
-    .progress-track { background: var(--border); border-radius: 4px; height: 5px; }
-    .progress-bar { background: var(--accent); height: 5px; border-radius: 4px; transition: width 0.4s; }
-    .progress-wrap { margin-bottom: 18px; }
+/* ââ PROGRESS ââ */
+.progress-row { display: flex; justify-content: space-between; font-size: 12px; color: var(--dim); margin-bottom: 7px; }
+.progress-track { background: var(--border); border-radius: 4px; height: 5px; }
+.progress-bar { background: var(--accent); height: 5px; border-radius: 4px; transition: width 0.4s; }
+.progress-wrap { margin-bottom: 18px; }
 
-    /* ── GROUP CARD ── */
-    .g-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; margin-bottom: 14px; overflow: hidden; }
-    .g-card.complete { border-color: rgba(201,170,113,0.4); }
-    .g-head { background: var(--surface2); padding: 9px 14px; display: flex; align-items: center; justify-content: space-between; }
-    .g-title { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; color: var(--accent); }
-    .g-status { font-size: 11px; color: var(--dim); }
-    .g-status.done { color: var(--green); }
-    .g-body { padding: 12px; }
+/* ââ GROUP CARD ââ */
+.g-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; margin-bottom: 14px; overflow: hidden; }
+.g-card.complete { border-color: rgba(201,170,113,0.4); }
+.g-head { background: var(--surface2); padding: 9px 14px; display: flex; align-items: center; justify-content: space-between; }
+.g-title { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; color: var(--accent); }
+.g-status { font-size: 11px; color: var(--dim); }
+.g-status.done { color: var(--green); }
+.g-body { padding: 12px; }
 
-    /* Rank slots */
-    .slots { display: grid; grid-template-columns: repeat(4,1fr); gap: 7px; margin-bottom: 12px; }
-    .slot {
-      background: var(--bg); border: 1.5px dashed var(--border); border-radius: 9px;
-      padding: 7px 3px; text-align: center; min-height: 68px;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      transition: all 0.15s;
-    }
-    .slot.filled { border-style: solid; border-color: var(--accent); background: var(--accent-dim); }
-    .slot.third-qualified { border-style: solid; border-color: rgba(243,156,18,0.6); background: rgba(243,156,18,0.08); }
-    .slot-pos { font-size: 9px; color: var(--dim); font-weight: 700; text-transform: uppercase; margin-bottom: 3px; letter-spacing: 0.5px; }
-    .slot-pos.adv { color: var(--green); }
-    .slot-pos.third-q { color: var(--orange); }
-    .slot-flag { font-size: 22px; line-height: 1; margin-bottom: 2px; }
-    .slot-abbr { font-size: 10px; font-weight: 700; }
-    .slot-empty { font-size: 18px; color: var(--border); }
-    .slot-pts { font-size: 9px; margin-top: 2px; font-weight: 700; }
+/* Rank slots */
+.slots { display: grid; grid-template-columns: repeat(4,1fr); gap: 7px; margin-bottom: 12px; }
+.slot {
+background: var(--bg); border: 1.5px dashed var(--border); border-radius: 9px;
+padding: 7px 3px; text-align: center; min-height: 68px;
+display: flex; flex-direction: column; align-items: center; justify-content: center;
+transition: all 0.15s;
+}
+.slot.filled { border-style: solid; border-color: var(--accent); background: var(--accent-dim); }
+.slot.third-qualified { border-style: solid; border-color: rgba(243,156,18,0.6); background: rgba(243,156,18,0.08); }
+.slot-pos { font-size: 9px; color: var(--dim); font-weight: 700; text-transform: uppercase; margin-bottom: 3px; letter-spacing: 0.5px; }
+.slot-pos.adv { color: var(--green); }
+.slot-pos.third-q { color: var(--orange); }
+.slot-flag { font-size: 22px; line-height: 1; margin-bottom: 2px; }
+.slot-abbr { font-size: 10px; font-weight: 700; }
+.slot-empty { font-size: 18px; color: var(--border); }
+.slot-pts { font-size: 9px; margin-top: 2px; font-weight: 700; }
 
-    /* Team buttons */
-    .teams { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
-    .team-btn {
-      background: var(--bg); border: 1px solid var(--border); border-radius: 9px;
-      padding: 9px 10px; display: flex; align-items: center; gap: 8px;
-      cursor: pointer; transition: all 0.15s; color: var(--text); font-size: 13px;
-      text-align: left; width: 100%;
-    }
-    .team-btn:active { transform: scale(0.97); }
-    .team-btn.picked { border-color: var(--accent); background: var(--accent-dim); }
-    .team-btn.picks-locked { cursor: default; }
-    .t-flag { font-size: 22px; flex-shrink: 0; }
-    .t-name { flex: 1; font-size: 11px; font-weight: 600; line-height: 1.3; }
-    .t-badge {
-      width: 21px; height: 21px; border-radius: 50%;
-      background: var(--accent); color: var(--bg); font-size: 11px; font-weight: 800;
-      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-    }
+/* Team buttons */
+.teams { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+.team-btn {
+background: var(--bg); border: 1px solid var(--border); border-radius: 9px;
+padding: 9px 10px; display: flex; align-items: center; gap: 8px;
+cursor: pointer; transition: all 0.15s; color: var(--text); font-size: 13px;
+text-align: left; width: 100%;
+}
+.team-btn:active { transform: scale(0.97); }
+.team-btn.picked { border-color: var(--accent); background: var(--accent-dim); }
+.team-btn.picks-locked { cursor: default; }
+.t-flag { font-size: 22px; flex-shrink: 0; }
+.t-name { flex: 1; font-size: 11px; font-weight: 600; line-height: 1.3; }
+.t-badge {
+width: 21px; height: 21px; border-radius: 50%;
+background: var(--accent); color: var(--bg); font-size: 11px; font-weight: 800;
+display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
 
-    /* ── SAVE BAR ── */
-    .save-bar {
-      position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
-      width: 100%; max-width: 500px; background: var(--bg);
-      border-top: 1px solid var(--border); padding: 12px 14px;
-      z-index: 198;
-    }
-    .save-btn {
-      width: 100%; background: var(--green); color: #fff; border: none;
-      border-radius: 10px; padding: 15px; font-size: 15px; font-weight: 700;
-      cursor: pointer; transition: all 0.2s;
-    }
-    .save-btn:disabled { background: var(--border); color: var(--dim); cursor: default; }
-    .save-btn.saved { background: var(--accent); color: var(--bg); }
+/* ââ SAVE BAR ââ */
+.save-bar {
+position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+width: 100%; max-width: 500px; background: var(--bg);
+border-top: 1px solid var(--border); padding: 12px 14px;
+z-index: 198;
+}
+.save-btn {
+width: 100%; background: var(--green); color: #fff; border: none;
+border-radius: 10px; padding: 15px; font-size: 15px; font-weight: 700;
+cursor: pointer; transition: all 0.2s;
+}
+.save-btn:disabled { background: var(--border); color: var(--dim); cursor: default; }
+.save-btn.saved { background: var(--accent); color: var(--bg); }
 
-    /* ── LEADERBOARD ── */
-    .lb-item {
-      background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
-      padding: 13px 14px; display: flex; align-items: center; gap: 12px; margin-bottom: 10px;
-    }
-    .lb-item.me { border-color: var(--accent); background: var(--accent-dim); }
-    .lb-rank { width: 28px; text-align: center; font-size: 17px; font-weight: 900; color: var(--dim); flex-shrink: 0; }
-    .lb-rank.g { color: #FFD700; }
-    .lb-rank.s { color: #C0C0C0; }
-    .lb-rank.b { color: #CD7F32; }
-    .lb-info { flex: 1; }
-    .lb-name { font-size: 15px; font-weight: 700; }
-    .lb-meta { font-size: 11px; color: var(--dim); margin-top: 2px; }
-    .lb-pts { text-align: right; }
-    .lb-score { font-size: 22px; font-weight: 900; color: var(--accent); line-height: 1; }
-    .lb-pts-label { font-size: 10px; color: var(--dim); }
+/* ââ LEADERBOARD ââ */
+.lb-item {
+background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+padding: 13px 14px; display: flex; align-items: center; gap: 12px; margin-bottom: 10px;
+}
+.lb-item.me { border-color: var(--accent); background: var(--accent-dim); }
+.lb-rank { width: 28px; text-align: center; font-size: 17px; font-weight: 900; color: var(--dim); flex-shrink: 0; }
+.lb-rank.g { color: #FFD700; }
+.lb-rank.s { color: #C0C0C0; }
+.lb-rank.b { color: #CD7F32; }
+.lb-info { flex: 1; }
+.lb-name { font-size: 15px; font-weight: 700; }
+.lb-meta { font-size: 11px; color: var(--dim); margin-top: 2px; }
+.lb-pts { text-align: right; }
+.lb-score { font-size: 22px; font-weight: 900; color: var(--accent); line-height: 1; }
+.lb-pts-label { font-size: 10px; color: var(--dim); }
 
-    /* ── LOCKED SCREEN ── */
-    .locked-screen { text-align: center; padding: 70px 20px 40px; }
-    .locked-icon { font-size: 58px; margin-bottom: 16px; }
-    .locked-h { font-size: 20px; font-weight: 700; margin-bottom: 10px; }
-    .locked-p { font-size: 14px; color: var(--dim); line-height: 1.7; }
-    .locked-date { display: inline-block; margin-top: 14px; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 10px 18px; font-size: 13px; font-weight: 600; }
+/* ââ LOCKED SCREEN ââ */
+.locked-screen { text-align: center; padding: 70px 20px 40px; }
+.locked-icon { font-size: 58px; margin-bottom: 16px; }
+.locked-h { font-size: 20px; font-weight: 700; margin-bottom: 10px; }
+.locked-p { font-size: 14px; color: var(--dim); line-height: 1.7; }
+.locked-date { display: inline-block; margin-top: 14px; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 10px 18px; font-size: 13px; font-weight: 600; }
 
-    /* ── ADMIN PANEL ── */
-    #adminPanel {
-      display: none; margin: 14px; background: var(--surface);
-      border: 1.5px solid var(--accent); border-radius: 14px; padding: 18px;
-    }
-    .admin-h { color: var(--accent); font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; }
-    .admin-section { margin-bottom: 22px; }
-    .admin-section-title { font-size: 11px; color: var(--dim); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
-    .result-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
-    .result-pos { font-size: 11px; color: var(--dim); width: 28px; font-weight: 700; flex-shrink: 0; }
-    select {
-      flex: 1; background: var(--bg); border: 1px solid var(--border); color: var(--text);
-      padding: 8px 10px; border-radius: 8px; font-size: 13px; outline: none;
-    }
-    .admin-group-label { font-size: 12px; color: var(--accent); font-weight: 700; margin-bottom: 8px; }
-    .admin-group-block { margin-bottom: 18px; }
-    .admin-btn { width: 100%; margin-bottom: 8px; padding: 12px; border-radius: 9px; border: 1px solid var(--border); background: var(--surface2); color: var(--text); font-size: 14px; font-weight: 600; cursor: pointer; }
-    .admin-btn.green { background: var(--green); border-color: var(--green); color: #fff; }
-    .admin-btn.gold { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+/* ââ ADMIN PANEL ââ */
+#adminPanel {
+display: none; margin: 14px; background: var(--surface);
+border: 1.5px solid var(--accent); border-radius: 14px; padding: 18px;
+}
+.admin-h { color: var(--accent); font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; }
+.admin-section { margin-bottom: 22px; }
+.admin-section-title { font-size: 11px; color: var(--dim); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+.result-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.result-pos { font-size: 11px; color: var(--dim); width: 28px; font-weight: 700; flex-shrink: 0; }
+select {
+flex: 1; background: var(--bg); border: 1px solid var(--border); color: var(--text);
+padding: 8px 10px; border-radius: 8px; font-size: 13px; outline: none;
+}
+.admin-group-label { font-size: 12px; color: var(--accent); font-weight: 700; margin-bottom: 8px; }
+.admin-group-block { margin-bottom: 18px; }
+.admin-btn { width: 100%; margin-bottom: 8px; padding: 12px; border-radius: 9px; border: 1px solid var(--border); background: var(--surface2); color: var(--text); font-size: 14px; font-weight: 600; cursor: pointer; }
+.admin-btn.green { background: var(--green); border-color: var(--green); color: #fff; }
+.admin-btn.gold { background: var(--accent); border-color: var(--accent); color: var(--bg); }
 
-    /* ── TOAST ── */
-    .toast {
-      position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px);
-      background: var(--green); color: #fff; padding: 10px 22px; border-radius: 24px;
-      font-size: 14px; font-weight: 600; z-index: 999; opacity: 0;
-      transition: all 0.3s; white-space: nowrap; pointer-events: none;
-    }
-    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-    .toast.err { background: var(--red); }
+/* ââ TOAST ââ */
+.toast {
+position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px);
+background: var(--green); color: #fff; padding: 10px 22px; border-radius: 24px;
+font-size: 14px; font-weight: 600; z-index: 999; opacity: 0;
+transition: all 0.3s; white-space: nowrap; pointer-events: none;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast.err { background: var(--red); }
 
-    /* ── MISC ── */
-    .section-label { font-size: 11px; color: var(--dim); text-transform: uppercase; letter-spacing: 1px; font-weight: 700; margin-bottom: 12px; }
-    .empty { text-align: center; padding: 50px 20px; color: var(--dim); font-size: 14px; line-height: 1.6; }
-    .scoring-info { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; margin-bottom: 18px; font-size: 12px; color: var(--dim); line-height: 1.8; }
-    .scoring-info strong { color: var(--accent); }
+/* ââ MISC ââ */
+.section-label { font-size: 11px; color: var(--dim); text-transform: uppercase; letter-spacing: 1px; font-weight: 700; margin-bottom: 12px; }
+.empty { text-align: center; padding: 50px 20px; color: var(--dim); font-size: 14px; line-height: 1.6; }
+.scoring-info { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; margin-bottom: 18px; font-size: 12px; color: var(--dim); line-height: 1.8; }
+.scoring-info strong { color: var(--accent); }
 
-    /* ── PLAYOFF BRACKET ── */
-    .round-section { margin-bottom: 28px; }
-    .round-header {
-      font-size: 11px; font-weight: 800; color: var(--accent);
-      text-transform: uppercase; letter-spacing: 2px;
-      padding: 0 0 10px; border-bottom: 1px solid var(--border);
-      margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;
-    }
-    .round-pts-badge {
-      background: var(--accent-dim); color: var(--accent);
-      border: 1px solid rgba(201,170,113,0.3); border-radius: 20px;
-      padding: 2px 9px; font-size: 10px; font-weight: 700; letter-spacing: 0;
-    }
-    .match-card {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: 12px; margin-bottom: 8px; overflow: hidden;
-    }
-    .match-num {
-      font-size: 10px; color: var(--dim); padding: 5px 12px 0;
-      text-transform: uppercase; letter-spacing: 0.5px;
-    }
-    .match-teams { display: grid; grid-template-columns: 1fr 1fr; }
-    .po-team {
-      display: flex; align-items: center; gap: 7px; padding: 10px 11px;
-      cursor: pointer; border: none; background: none; color: var(--text);
-      transition: background 0.15s; text-align: left; width: 100%;
-      border-top: 1px solid var(--border);
-    }
-    .po-team:first-child { border-right: 0.5px solid var(--border); }
-    .po-team:active { transform: scale(0.97); }
-    .po-team.picked { background: rgba(201,170,113,0.15); }
-    .po-team.correct { background: rgba(39,174,96,0.2); }
-    .po-team.wrong { opacity: 0.4; }
-    .po-team.tbd { color: var(--dim); cursor: default; font-style: italic; }
-    .po-team:disabled { opacity: 0.6; cursor: default; }
-    .po-flag { font-size: 19px; flex-shrink: 0; }
-    .po-name { flex: 1; font-size: 11px; font-weight: 600; line-height: 1.3; }
-    .po-check { font-size: 13px; flex-shrink: 0; }
-    .playoff-save-wrap { margin-top: 4px; margin-bottom: 32px; }
-    .playoff-progress { font-size: 12px; color: var(--dim); text-align: center; margin-bottom: 8px; }
+/* ââ PLAYOFF BRACKET ââ */
+.round-section { margin-bottom: 28px; }
+.round-header {
+font-size: 11px; font-weight: 800; color: var(--accent);
+text-transform: uppercase; letter-spacing: 2px;
+padding: 0 0 10px; border-bottom: 1px solid var(--border);
+margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;
+}
+.round-pts-badge {
+background: var(--accent-dim); color: var(--accent);
+border: 1px solid rgba(201,170,113,0.3); border-radius: 20px;
+padding: 2px 9px; font-size: 10px; font-weight: 700; letter-spacing: 0;
+}
+.match-card {
+background: var(--surface); border: 1px solid var(--border);
+border-radius: 12px; margin-bottom: 8px; overflow: hidden;
+}
+.match-num {
+font-size: 10px; color: var(--dim); padding: 5px 12px 0;
+text-transform: uppercase; letter-spacing: 0.5px;
+}
+.match-teams { display: grid; grid-template-columns: 1fr 1fr; }
+.po-team {
+display: flex; align-items: center; gap: 7px; padding: 10px 11px;
+cursor: pointer; border: none; background: none; color: var(--text);
+transition: background 0.15s; text-align: left; width: 100%;
+border-top: 1px solid var(--border);
+}
+.po-team:first-child { border-right: 0.5px solid var(--border); }
+.po-team:active { transform: scale(0.97); }
+.po-team.picked { background: rgba(201,170,113,0.15); }
+.po-team.correct { background: rgba(39,174,96,0.2); }
+.po-team.wrong { opacity: 0.4; }
+.po-team.tbd { color: var(--dim); cursor: default; font-style: italic; }
+.po-team:disabled { opacity: 0.6; cursor: default; }
+.po-flag { font-size: 19px; flex-shrink: 0; }
+.po-name { flex: 1; font-size: 11px; font-weight: 600; line-height: 1.3; }
+.po-check { font-size: 13px; flex-shrink: 0; }
+.playoff-save-wrap { margin-top: 4px; margin-bottom: 32px; }
+.playoff-progress { font-size: 12px; color: var(--dim); text-align: center; margin-bottom: 8px; }
 
-    /* ── LEADERBOARD 4-COL ── */
-    .lb-scores { display: flex; gap: 10px; align-items: center; flex-shrink: 0; }
-    .lb-score-block { text-align: center; min-width: 34px; }
-    .lb-score-val { font-size: 17px; font-weight: 900; color: var(--accent); line-height: 1; }
-    .lb-score-val.total-pts { color: #fff; font-size: 21px; }
-    .lb-score-lbl { font-size: 9px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.3px; margin-top: 2px; }
-    .lb-divider { width: 1px; height: 28px; background: var(--border); flex-shrink: 0; }
+/* ââ LEADERBOARD 4-COL ââ */
+.lb-scores { display: flex; gap: 10px; align-items: center; flex-shrink: 0; }
+.lb-score-block { text-align: center; min-width: 34px; }
+.lb-score-val { font-size: 17px; font-weight: 900; color: var(--accent); line-height: 1; }
+.lb-score-val.total-pts { color: #fff; font-size: 21px; }
+.lb-score-lbl { font-size: 9px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.3px; margin-top: 2px; }
+.lb-divider { width: 1px; height: 28px; background: var(--border); flex-shrink: 0; }
 
-    @media (min-width: 501px) {
-      body { border-left: 1px solid var(--border); border-right: 1px solid var(--border); box-shadow: 0 0 60px rgba(0,0,0,0.5); }
-    }
-  </style>
+/* ââ SCHEDULE ââ */
+.sched-date-group {
+margin-bottom: 12px;
+border: 1px solid var(--border);
+border-radius: 12px;
+overflow: hidden;
+}
+.sched-date-group.today { border-color: var(--accent); }
+.sched-date-label {
+background: var(--surface2);
+padding: 8px 14px;
+font-size: 11px;
+font-weight: 800;
+text-transform: uppercase;
+letter-spacing: 1px;
+color: var(--dim);
+}
+.sched-date-group.today .sched-date-label { color: var(--accent); }
+.sched-date-group.past .sched-date-label { color: #4a6a90; }
+.sched-match {
+display: flex;
+align-items: center;
+padding: 10px 14px;
+border-top: 1px solid var(--border);
+gap: 6px;
+}
+.sched-team {
+flex: 1;
+display: flex;
+align-items: center;
+gap: 7px;
+}
+.sched-team.right { flex-direction: row-reverse; text-align: right; }
+.sched-team.won .sched-name { color: var(--green); font-weight: 700; }
+.sched-team.won .sched-flag { filter: none; }
+.sched-team.lost { opacity: 0.4; }
+.sched-flag { font-size: 20px; flex-shrink: 0; }
+.sched-name { font-size: 11px; font-weight: 600; line-height: 1.3; }
+.sched-vs {
+font-size: 10px;
+color: var(--dim);
+font-weight: 700;
+flex-shrink: 0;
+padding: 0 4px;
+min-width: 20px;
+text-align: center;
+}
+.sched-winner-badge {
+font-size: 10px;
+color: var(--green);
+font-weight: 700;
+}
+.sched-round-title {
+font-size: 11px;
+color: var(--dim);
+text-transform: uppercase;
+letter-spacing: 1px;
+font-weight: 700;
+margin: 18px 0 10px;
+}
+.sched-upcoming-note {
+background: var(--surface);
+border: 1px solid var(--border);
+border-radius: 10px;
+padding: 16px;
+text-align: center;
+font-size: 13px;
+color: var(--dim);
+line-height: 1.7;
+}
+
+@media (min-width: 501px) {
+body { border-left: 1px solid var(--border); border-right: 1px solid var(--border); box-shadow: 0 0 60px rgba(0,0,0,0.5); }
+}
+</style>
 </head>
 <body>
 
-<!-- ═══════════════════════════════════ LOGIN ═══════════════════════════════════ -->
+<!-- âââââââââââââââââââââââââââââââââââ LOGIN âââââââââââââââââââââââââââââââââââ -->
 <div id="loginScreen">
-  <div class="login-card">
-    <div class="login-wordmark">PANAM FC</div>
-    <div class="login-title">2026 World Cup Bracket Challenge</div>
+<div class="login-card">
+<div class="login-wordmark">PANAM FC</div>
+<div class="login-title">2026 World Cup Bracket Challenge</div>
 
-    <div class="field-wrap">
-      <label class="field-label">Your Name</label>
-      <input type="text" id="nameInput" placeholder="e.g. Carlos" maxlength="20" autocomplete="off"
-        onkeydown="if(event.key==='Enter')login()" />
-    </div>
-    <div class="field-wrap">
-      <label class="field-label">Group Code</label>
-      <input type="text" id="codeInput" placeholder="Ask the group admin" autocomplete="off"
-        onkeydown="if(event.key==='Enter')login()" />
-    </div>
-
-    <button class="btn" onclick="login()">Enter Challenge →</button>
-    <div class="err" id="loginErr"></div>
-    <p class="login-hint">Share the group code in your WhatsApp group</p>
-  </div>
+<div class="field-wrap">
+<label class="field-label">Your Name</label>
+<input type="text" id="nameInput" placeholder="e.g. Carlos" maxlength="20" autocomplete="off"
+onkeydown="if(event.key==='Enter')login()" />
+</div>
+<div class="field-wrap">
+<label class="field-label">Group Code</label>
+<input type="text" id="codeInput" placeholder="Ask the group admin" autocomplete="off"
+onkeydown="if(event.key==='Enter')login()" />
 </div>
 
-<!-- ═══════════════════════════════════ MAIN APP ═══════════════════════════════════ -->
+<button class="btn" onclick="login()">Enter Challenge â</button>
+<div class="err" id="loginErr"></div>
+<p class="login-hint">Share the group code in your WhatsApp group</p>
+</div>
+</div>
+
+<!-- âââââââââââââââââââââââââââââââââââ MAIN APP âââââââââââââââââââââââââââââââââââ -->
 <div id="mainApp">
 
-  <header id="appHeader">
-    <div class="hd-left" id="logoArea">
-      <div>
-        <div class="hd-wordmark">PANAM FC</div>
-        <div class="hd-sub">2026 World Cup Bracket</div>
-      </div>
-    </div>
-    <div class="hd-right">
-      <span class="hd-name" id="hdName"></span>
-      <span class="hd-score" id="hdScore">0 pts</span>
-    </div>
-  </header>
+<header id="appHeader">
+<div class="hd-left" id="logoArea">
+<div>
+<div class="hd-wordmark">PANAM FC</div>
+<div class="hd-sub">2026 World Cup Bracket</div>
+</div>
+</div>
+<div class="hd-right">
+<span class="hd-name" id="hdName"></span>
+<span class="hd-score" id="hdScore">0 pts</span>
+</div>
+</header>
 
-  <div class="tabs">
-    <button class="tab-btn active" id="tabBtn-groups"    onclick="showTab('groups')">Groups</button>
-    <button class="tab-btn"        id="tabBtn-playoffs"  onclick="showTab('playoffs')">Playoffs 🔒</button>
-    <button class="tab-btn"        id="tabBtn-leaderboard" onclick="showTab('leaderboard')">Leaderboard</button>
-  </div>
+<div class="tabs">
+<button class="tab-btn active" id="tabBtn-groups"      onclick="showTab('groups')">Groups</button>
+<button class="tab-btn"        id="tabBtn-schedule"    onclick="showTab('schedule')">Schedule</button>
+<button class="tab-btn"        id="tabBtn-playoffs"    onclick="showTab('playoffs')">Playoffs ð</button>
+<button class="tab-btn"        id="tabBtn-leaderboard" onclick="showTab('leaderboard')">Standings</button>
+</div>
 
-  <div class="banner" id="deadlineBanner"></div>
+<div class="banner" id="deadlineBanner"></div>
 
-  <!-- ── GROUPS TAB ── -->
-  <div id="pane-groups" class="tab-pane">
-    <div class="progress-wrap">
-      <div class="progress-row">
-        <span>Groups completed</span>
-        <span id="progressText">0 / 12</span>
-      </div>
-      <div class="progress-track">
-        <div class="progress-bar" id="progressBar" style="width:0%"></div>
-      </div>
-    </div>
-    <div class="scoring-info">
-      🏆 <strong>Scoring:</strong> Exact 1st = 4pts · Exact 2nd = 3pts · Right team, wrong advance slot = 2pts · Exact 3rd = 2pts · Exact 3rd (team also advanced to R32) = 3pts · Exact 4th = 1pt
-    </div>
-    <div id="groupsContainer"></div>
-  </div>
+<!-- ââ GROUPS TAB ââ -->
+<div id="pane-groups" class="tab-pane">
+<div class="progress-wrap">
+<div class="progress-row">
+<span>Groups completed</span>
+<span id="progressText">0 / 12</span>
+</div>
+<div class="progress-track">
+<div class="progress-bar" id="progressBar" style="width:0%"></div>
+</div>
+</div>
+<div class="scoring-info">
+ð <strong>Scoring:</strong> Exact 1st = 4pts Â· Exact 2nd = 3pts Â· Right team, wrong advance slot = 2pts Â· Exact 3rd = 2pts Â· Exact 3rd (team also advanced to R32) = 3pts Â· Exact 4th = 1pt
+</div>
+<div id="groupsContainer"></div>
+</div>
 
-  <!-- ── PLAYOFFS TAB ── -->
-  <div id="pane-playoffs" class="tab-pane" style="display:none">
-    <div id="playoffLocked">
-      <div class="locked-screen">
-        <div class="locked-icon">🔒</div>
-        <div class="locked-h">Playoff Bracket Locked</div>
-        <div class="locked-p">
-          Playoff picks open once the group stage is complete and FIFA confirms the Round of 32 matchups.
-          <div class="locked-date">📅 Group stage ends: June 27 · R32 starts: June 28</div>
-        </div>
-      </div>
-    </div>
-    <div id="playoffOpen" style="display:none">
-      <div class="scoring-info">
-        🏆 <strong>Playoff Scoring:</strong> R32=1pt · R16=2pts · QF=3pts · SF=4pts · Final=5pts — pick winners all the way through!
-      </div>
-      <div id="playoffBracketContainer"></div>
-      <div class="playoff-save-wrap">
-        <div class="playoff-progress" id="playoffProgressText"></div>
-        <button class="save-btn" id="savePlayoffBtn" onclick="savePlayoffPicks()">💾 Save Playoff Picks</button>
-      </div>
-    </div>
-  </div>
+<!-- ââ SCHEDULE TAB ââ -->
+<div id="pane-schedule" class="tab-pane" style="display:none">
+<div id="scheduleContainer"><div class="empty">Loading scheduleâ¦</div></div>
+</div>
 
-  <!-- ── LEADERBOARD TAB ── -->
-  <div id="pane-leaderboard" class="tab-pane" style="display:none">
-    <div class="section-label">Standings</div>
-    <div id="lbContainer"><div class="empty">Loading...</div></div>
-  </div>
+<!-- ââ PLAYOFFS TAB ââ -->
+<div id="pane-playoffs" class="tab-pane" style="display:none">
+<div id="playoffLocked">
+<div class="locked-screen">
+<div class="locked-icon">ð</div>
+<div class="locked-h">Playoff Bracket Locked</div>
+<div class="locked-p">
+Playoff picks open once the group stage is complete and FIFA confirms the Round of 32 matchups.
+<div class="locked-date">ð Group stage ends: June 27 Â· R32 starts: June 28</div>
+</div>
+</div>
+</div>
+<div id="playoffOpen" style="display:none">
+<div class="scoring-info">
+ð <strong>Playoff Scoring:</strong> R32=1pt Â· R16=2pts Â· QF=3pts Â· SF=4pts Â· Final=5pts â pick winners all the way through!
+</div>
+<div id="playoffBracketContainer"></div>
+<div class="playoff-save-wrap">
+<div class="playoff-progress" id="playoffProgressText"></div>
+<button class="save-btn" id="savePlayoffBtn" onclick="savePlayoffPicks()">ð¾ Save Playoff Picks</button>
+</div>
+</div>
+</div>
 
-  <!-- Save bar (shown only on groups tab) -->
-  <div class="save-bar" id="saveBar">
-    <button class="save-btn" id="saveBtn" onclick="savePicks()">Save My Picks</button>
-  </div>
+<!-- ââ LEADERBOARD TAB ââ -->
+<div id="pane-leaderboard" class="tab-pane" style="display:none">
+<div class="section-label">Standings</div>
+<div id="lbContainer"><div class="empty">Loading...</div></div>
+</div>
+
+<!-- Save bar (shown only on groups tab) -->
+<div class="save-bar" id="saveBar">
+<button class="save-btn" id="saveBtn" onclick="savePicks()">Save My Picks</button>
+</div>
 
 </div><!-- /mainApp -->
 
-<!-- ═══════════════════════════════════ ADMIN PANEL ═══════════════════════════════════ -->
+<!-- âââââââââââââââââââââââââââââââââââ ADMIN PANEL âââââââââââââââââââââââââââââââââââ -->
 <div id="adminPanel">
-  <div class="admin-h">⚙️ Admin Panel</div>
+<div class="admin-h">âï¸ Admin Panel</div>
 
-  <div class="admin-section">
-    <div class="admin-section-title">Enter Group Stage Results</div>
-    <div id="adminResultsContainer"></div>
-    <button class="admin-btn gold" onclick="adminSaveResults()">💾 Save Results &amp; Recalculate Scores</button>
-  </div>
+<div class="admin-section">
+<div class="admin-section-title">Enter Group Stage Results</div>
+<div id="adminResultsContainer"></div>
+<button class="admin-btn gold" onclick="adminSaveResults()">ð¾ Save Results &amp; Recalculate Scores</button>
+</div>
 
-  <div class="admin-section">
-    <div class="admin-section-title">Controls</div>
-    <button class="admin-btn" id="playoffToggleBtn" onclick="adminTogglePlayoff()">🔓 Unlock Playoff Tab</button>
-    <button class="admin-btn green" onclick="adminRecalcScores()">🔄 Recalculate All Scores</button>
-  </div>
+<div class="admin-section">
+<div class="admin-section-title">Controls</div>
+<button class="admin-btn" id="playoffToggleBtn" onclick="adminTogglePlayoff()">ð Unlock Playoff Tab</button>
+<button class="admin-btn green" onclick="adminRecalcScores()">ð Recalculate All Scores</button>
+</div>
 </div>
 
 <!-- Toast -->
 <div class="toast" id="toast"></div>
 
-
 <script>
-// ════════════════════════════════════════════════
-//  ⚙️  CONFIGURATION  — replace before deploying
-// ════════════════════════════════════════════════
+// ââââââââââââââââââââââââââââââââââââââââââââââââ
+// âï¸ CONFIGURATION â replace before deploying
+// ââââââââââââââââââââââââââââââââââââââââââââââââ
 const FIREBASE_CONFIG = {
-  apiKey:            "AIzaSyCSTDLUBQLyExkTLlvdjpvl_nJ6id-nXKg",
-  authDomain:        "panam-fc-2026-world-cup.firebaseapp.com",
-  projectId:         "panam-fc-2026-world-cup",
-  storageBucket:     "panam-fc-2026-world-cup.firebasestorage.app",
-  messagingSenderId: "30355800428",
-  appId:             "1:30355800428:web:94e93c78e48ef9a3fd3349"
+apiKey: "AIzaSyCSTDLUBQLyExkTLlvdjpvl_nJ6id-nXKg",
+authDomain: "panam-fc-2026-world-cup.firebaseapp.com",
+projectId: "panam-fc-2026-world-cup",
+storageBucket: "panam-fc-2026-world-cup.firebasestorage.app",
+messagingSenderId: "30355800428",
+appId: "1:30355800428:web:94e93c78e48ef9a3fd3349"
 };
 
-const GROUP_CODE      = "PANAMFC2026";   // ← share this in WhatsApp
-const ADMIN_PASSWORD  = "admin2026!";    // ← change this before deploying
-const PICK_DEADLINE   = new Date("2026-06-11T20:00:00Z"); // Jun 11 4 PM ET (30 min before kickoff)
-// ════════════════════════════════════════════════
+const GROUP_CODE = "PANAMFC2026"; // â share this in WhatsApp
+const ADMIN_PASSWORD = "admin2026!"; // â change this before deploying
+const PICK_DEADLINE = new Date("2026-06-11T20:00:00Z"); // Jun 11 4 PM ET
+// ââââââââââââââââââââââââââââââââââââââââââââââââ
 
-// ── Tournament Data ──
+// ââ Tournament Data ââ
 const GROUPS = {
-  A: ['Mexico','South Africa','Korea Republic','Czechia'],
-  B: ['Canada','Bosnia & Herzegovina','Qatar','Switzerland'],
-  C: ['Haiti','Scotland','Brazil','Morocco'],
-  D: ['USA','Paraguay','Australia','Türkiye'],
-  E: ["Côte d'Ivoire",'Ecuador','Germany','Curaçao'],
-  F: ['Netherlands','Japan','Sweden','Tunisia'],
-  G: ['IR Iran','New Zealand','Belgium','Egypt'],
-  H: ['Saudi Arabia','Uruguay','Spain','Cabo Verde'],
-  I: ['France','Senegal','Iraq','Norway'],
-  J: ['Argentina','Algeria','Austria','Jordan'],
-  K: ['Portugal','Congo DR','Uzbekistan','Colombia'],
-  L: ['Ghana','Panama','England','Croatia']
+A: ['Mexico','South Africa','Korea Republic','Czechia'],
+B: ['Canada','Bosnia & Herzegovina','Qatar','Switzerland'],
+C: ['Haiti','Scotland','Brazil','Morocco'],
+D: ['USA','Paraguay','Australia','TÃ¼rkiye'],
+E: ["CÃ´te d'Ivoire",'Ecuador','Germany','CuraÃ§ao'],
+F: ['Netherlands','Japan','Sweden','Tunisia'],
+G: ['IR Iran','New Zealand','Belgium','Egypt'],
+H: ['Saudi Arabia','Uruguay','Spain','Cabo Verde'],
+I: ['France','Senegal','Iraq','Norway'],
+J: ['Argentina','Algeria','Austria','Jordan'],
+K: ['Portugal','Congo DR','Uzbekistan','Colombia'],
+L: ['Ghana','Panama','England','Croatia']
 };
 
 const FLAGS = {
-  'Mexico':'🇲🇽','South Africa':'🇿🇦','Korea Republic':'🇰🇷','Czechia':'🇨🇿',
-  'Canada':'🇨🇦','Bosnia & Herzegovina':'🇧🇦','Qatar':'🇶🇦','Switzerland':'🇨🇭',
-  'Haiti':'🇭🇹','Scotland':'🏴󠁧󠁢󠁳󠁣󠁴󠁿','Brazil':'🇧🇷','Morocco':'🇲🇦',
-  'USA':'🇺🇸','Paraguay':'🇵🇾','Australia':'🇦🇺','Türkiye':'🇹🇷',
-  "Côte d'Ivoire":'🇨🇮','Ecuador':'🇪🇨','Germany':'🇩🇪','Curaçao':'🇨🇼',
-  'Netherlands':'🇳🇱','Japan':'🇯🇵','Sweden':'🇸🇪','Tunisia':'🇹🇳',
-  'IR Iran':'🇮🇷','New Zealand':'🇳🇿','Belgium':'🇧🇪','Egypt':'🇪🇬',
-  'Saudi Arabia':'🇸🇦','Uruguay':'🇺🇾','Spain':'🇪🇸','Cabo Verde':'🇨🇻',
-  'France':'🇫🇷','Senegal':'🇸🇳','Iraq':'🇮🇶','Norway':'🇳🇴',
-  'Argentina':'🇦🇷','Algeria':'🇩🇿','Austria':'🇦🇹','Jordan':'🇯🇴',
-  'Portugal':'🇵🇹','Congo DR':'🇨🇩','Uzbekistan':'🇺🇿','Colombia':'🇨🇴',
-  'Ghana':'🇬🇭','Panama':'🇵🇦','England':'🏴󠁧󠁢󠁥󠁮󠁧󠁿','Croatia':'🇭🇷'
+'Mexico':'ð²ð½','South Africa':'ð¿ð¦','Korea Republic':'ð°ð·','Czechia':'ð¨ð¿',
+'Canada':'ð¨ð¦','Bosnia & Herzegovina':'ð§ð¦','Qatar':'ð¶ð¦','Switzerland':'ð¨ð­',
+'Haiti':'ð­ð¹','Scotland':'ð´ó §ó ¢ó ³ó £ó ´ó ¿','Brazil':'ð§ð·','Morocco':'ð²ð¦',
+'USA':'ðºð¸','Paraguay':'ðµð¾','Australia':'ð¦ðº','TÃ¼rkiye':'ð¹ð·',
+"CÃ´te d'Ivoire":'ð¨ð®','Ecuador':'ðªð¨','Germany':'ð©ðª','CuraÃ§ao':'ð¨ð¼',
+'Netherlands':'ð³ð±','Japan':'ð¯ðµ','Sweden':'ð¸ðª','Tunisia':'ð¹ð³',
+'IR Iran':'ð®ð·','New Zealand':'ð³ð¿','Belgium':'ð§ðª','Egypt':'ðªð¬',
+'Saudi Arabia':'ð¸ð¦','Uruguay':'ðºð¾','Spain':'ðªð¸','Cabo Verde':'ð¨ð»',
+'France':'ð«ð·','Senegal':'ð¸ð³','Iraq':'ð®ð¶','Norway':'ð³ð´',
+'Argentina':'ð¦ð·','Algeria':'ð©ð¿','Austria':'ð¦ð¹','Jordan':'ð¯ð´',
+'Portugal':'ðµð¹','Congo DR':'ð¨ð©','Uzbekistan':'ðºð¿','Colombia':'ð¨ð´',
+'Ghana':'ð¬ð­','Panama':'ðµð¦','England':'ð´ó §ó ¢ó ¥ó ®ó §ó ¿','Croatia':'ð­ð·'
 };
 
 const ABBR = {
-  'Korea Republic':'KOR','South Africa':'RSA','Bosnia & Herzegovina':'BIH',
-  "Côte d'Ivoire":'CIV','IR Iran':'IRN','New Zealand':'NZL',
-  'Saudi Arabia':'KSA','Cabo Verde':'CPV','Congo DR':'COD',
-  'Czechia':'CZE','Curaçao':'CUW','Uzbekistan':'UZB'
+'Korea Republic':'KOR','South Africa':'RSA','Bosnia & Herzegovina':'BIH',
+"CÃ´te d'Ivoire":'CIV','IR Iran':'IRN','New Zealand':'NZL',
+'Saudi Arabia':'KSA','Cabo Verde':'CPV','Congo DR':'COD',
+'Czechia':'CZE','CuraÃ§ao':'CUW','Uzbekistan':'UZB'
 };
 function abbr(t){ return ABBR[t] || t.slice(0,3).toUpperCase(); }
 
 const ORDINALS = ['1st','2nd','3rd','4th'];
 
-// ── 8 Third-Place Teams That Advanced to the Round of 32 ──
-// (Top 2 from each group advance automatically; these 8 best 3rd-place teams also qualified)
 const THIRD_PLACE_QUALIFIERS = new Set([
-  'Ecuador',            // 3rd in Group E
-  'Sweden',             // 3rd in Group F
-  'Bosnia & Herzegovina', // 3rd in Group B
-  'Paraguay',           // 3rd in Group D
-  'Senegal',            // 3rd in Group I
-  'Ghana',              // 3rd in Group L
-  'Algeria',            // 3rd in Group J
-  'Congo DR'            // 3rd in Group K
+'Ecuador','Sweden','Bosnia & Herzegovina','Paraguay',
+'Senegal','Ghana','Algeria','Congo DR'
 ]);
 
-// ── Correct R32 Bracket — ordered so the bracket tree progression is accurate ──
-//
-// The bracket folds like this:
-//   R32[0] & R32[1] → R16[0] → QF[0] → SF[0] → Final
-//   R32[2] & R32[3] → R16[1] → QF[0] → SF[0] → Final
-//   R32[4] & R32[5] → R16[2] → QF[1] → SF[0] → Final
-//   R32[6] & R32[7] → R16[3] → QF[1] → SF[0] → Final
-//   R32[8] & R32[9] → R16[4] → QF[2] → SF[1] → Final
-//   R32[10]& R32[11]→ R16[5] → QF[2] → SF[1] → Final
-//   R32[12]& R32[13]→ R16[6] → QF[3] → SF[1] → Final
-//   R32[14]& R32[15]→ R16[7] → QF[3] → SF[1] → Final
-//
-// SF half 1: QF[0] + QF[1]  (Germany/France side vs Portugal/USA side)
-// SF half 2: QF[2] + QF[3]  (Brazil/Mexico side vs Argentina/Colombia side)
+// ââ R32 Bracket (hardcoded in correct progression order) ââ
+// Indices here must EXACTLY match what sync-results.js writes to Firestore
+// (sync-results.js now reorders ESPN data to match this same order).
 const R32_BRACKET = [
-  // ── QF[0] half ──
-  // R16[0] = M89: W(M74) vs W(M77)
-  { home: 'Germany',             away: 'Paraguay'            }, // [0] FIFA M74
-  { home: 'France',              away: 'Sweden'              }, // [1] FIFA M77
-  // R16[1] = M90: W(M73) vs W(M75)  ← Canada plays winner of Netherlands/Morocco
-  { home: 'South Africa',        away: 'Canada'              }, // [2] FIFA M73
-  { home: 'Netherlands',         away: 'Morocco'             }, // [3] FIFA M75
-
-  // ── QF[1] half ──
-  // R16[2] = M93: W(M83) vs W(M84)
-  { home: 'Portugal',            away: 'Croatia'             }, // [4] FIFA M83
-  { home: 'Spain',               away: 'Austria'             }, // [5] FIFA M84
-  // R16[3] = M94: W(M81) vs W(M82)
-  { home: 'USA',                 away: 'Bosnia & Herzegovina'}, // [6] FIFA M81
-  { home: 'Belgium',             away: 'Senegal'             }, // [7] FIFA M82
-
-  // ── QF[2] half ──
-  // R16[4] = M91: W(M76) vs W(M78)
-  { home: 'Brazil',              away: 'Japan'               }, // [8] FIFA M76
-  { home: "Côte d'Ivoire",       away: 'Norway'              }, // [9] FIFA M78
-  // R16[5] = M92: W(M79) vs W(M80)
-  { home: 'Mexico',              away: 'Ecuador'             }, // [10] FIFA M79
-  { home: 'England',             away: 'Congo DR'            }, // [11] FIFA M80
-
-  // ── QF[3] half ──
-  // R16[6] = M95: W(M86) vs W(M88)
-  { home: 'Argentina',           away: 'Cabo Verde'          }, // [12] FIFA M86
-  { home: 'Australia',           away: 'Egypt'               }, // [13] FIFA M88
-  // R16[7] = M96: W(M85) vs W(M87)
-  { home: 'Switzerland',         away: 'Algeria'             }, // [14] FIFA M85
-  { home: 'Colombia',            away: 'Ghana'               }, // [15] FIFA M87
+{ home: 'Germany',            away: 'Paraguay'             }, // [0]
+{ home: 'France',             away: 'Sweden'               }, // [1]
+{ home: 'South Africa',       away: 'Canada'               }, // [2]
+{ home: 'Netherlands',        away: 'Morocco'              }, // [3]
+{ home: 'Portugal',           away: 'Croatia'              }, // [4]
+{ home: 'Spain',              away: 'Austria'              }, // [5]
+{ home: 'USA',                away: 'Bosnia & Herzegovina' }, // [6]
+{ home: 'Belgium',            away: 'Senegal'              }, // [7]
+{ home: 'Brazil',             away: 'Japan'                }, // [8]
+{ home: "CÃ´te d'Ivoire",      away: 'Norway'               }, // [9]
+{ home: 'Mexico',             away: 'Ecuador'              }, // [10]
+{ home: 'England',            away: 'Congo DR'             }, // [11]
+{ home: 'Argentina',          away: 'Cabo Verde'           }, // [12]
+{ home: 'Australia',          away: 'Egypt'                }, // [13]
+{ home: 'Switzerland',        away: 'Algeria'              }, // [14]
+{ home: 'Colombia',           away: 'Ghana'                }, // [15]
 ];
 
-// ── Playoff Constants ──
-const PLAYOFF_ROUNDS   = ['R32','R16','QF','SF','F'];
-const ROUND_LABELS     = {R32:'Round of 32', R16:'Round of 16', QF:'Quarterfinals', SF:'Semifinals', F:'⚽ Final'};
-const ROUND_PTS        = {R32:1, R16:2, QF:3, SF:4, F:5};
-const ROUND_COUNTS     = {R32:16, R16:8, QF:4, SF:2, F:1};
+// ââ Schedule Data â R32 games with dates ââ
+// matchIdx refers to R32_BRACKET index
+const R32_SCHEDULE = [
+{ date: '2026-06-28', matchIdx: 2  }, // South Africa vs Canada
+{ date: '2026-06-29', matchIdx: 0  }, // Germany vs Paraguay
+{ date: '2026-06-29', matchIdx: 3  }, // Netherlands vs Morocco
+{ date: '2026-06-29', matchIdx: 8  }, // Brazil vs Japan
+{ date: '2026-06-30', matchIdx: 1  }, // France vs Sweden
+{ date: '2026-06-30', matchIdx: 9  }, // CÃ´te d'Ivoire vs Norway
+{ date: '2026-06-30', matchIdx: 10 }, // Mexico vs Ecuador
+{ date: '2026-07-01', matchIdx: 11 }, // England vs Congo DR
+{ date: '2026-07-01', matchIdx: 6  }, // USA vs Bosnia & Herzegovina
+{ date: '2026-07-01', matchIdx: 7  }, // Belgium vs Senegal
+{ date: '2026-07-02', matchIdx: 4  }, // Portugal vs Croatia
+{ date: '2026-07-02', matchIdx: 5  }, // Spain vs Austria
+{ date: '2026-07-02', matchIdx: 14 }, // Switzerland vs Algeria
+{ date: '2026-07-03', matchIdx: 12 }, // Argentina vs Cabo Verde
+{ date: '2026-07-03', matchIdx: 13 }, // Australia vs Egypt
+{ date: '2026-07-03', matchIdx: 15 }, // Colombia vs Ghana
+];
+
+// ââ Playoff Constants ââ
+const PLAYOFF_ROUNDS = ['R32','R16','QF','SF','F'];
+const ROUND_LABELS = {R32:'Round of 32', R16:'Round of 16', QF:'Quarterfinals', SF:'Semifinals', F:'â½ Final'};
+const ROUND_PTS = {R32:1, R16:2, QF:3, SF:4, F:5};
+const ROUND_COUNTS = {R32:16, R16:8, QF:4, SF:2, F:1};
 const PLAYOFF_DEADLINE = new Date(Date.UTC(2026, 5, 29, 17, 0, 0)); // Jun 29 noon CT
 
-// ── App State ──
+// ââ App State ââ
 let db, currentUser;
-let picks          = {};  // { A:['Mexico',...], ... }
-let results        = {};  // group stage actuals
+let picks = {};
+let results = {};
 let playoffUnlocked = false;
-let playoffBracket = {};  // { R32:[{home,away,winner},...], R16:[...], ... }
-let playoffPicks   = {};  // { 'R32-0':'Brazil', 'R16-0':'France', ... }
+let playoffBracket = {};
+let playoffPicks = {};
 let isAdmin = false;
 let logoTaps = 0;
 
-// ── Init Firebase ──
+// ââ Init Firebase ââ
 firebase.initializeApp(FIREBASE_CONFIG);
 db = firebase.firestore();
 
-// ── Boot ──
+// ââ Boot ââ
 (function boot(){
-  const saved = localStorage.getItem('wc2026_user');
-  if(saved){ currentUser = JSON.parse(saved); initApp(); }
-  if(window.location.hash === '#admin') setTimeout(showAdminLogin, 500);
+const saved = localStorage.getItem('wc2026_user');
+if(saved){ currentUser = JSON.parse(saved); initApp(); }
+if(window.location.hash === '#admin') setTimeout(showAdminLogin, 500);
 })();
 
-// ════════════════════ AUTH ════════════════════
+// ââââââââââââââââââââ AUTH ââââââââââââââââââââ
 function login(){
-  const name = document.getElementById('nameInput').value.trim();
-  const code = document.getElementById('codeInput').value.trim().toUpperCase();
-  const err  = document.getElementById('loginErr');
-  err.textContent = '';
-  if(!name){ err.textContent = 'Enter your name.'; return; }
-  if(code !== GROUP_CODE.toUpperCase()){ err.textContent = 'Wrong code — ask the admin!'; return; }
-  const id = 'u_' + name.toLowerCase().replace(/\s+/g,'_') + '_' + hashStr(name);
-  currentUser = { id, name };
-  localStorage.setItem('wc2026_user', JSON.stringify(currentUser));
-  initApp();
+const name = document.getElementById('nameInput').value.trim();
+const code = document.getElementById('codeInput').value.trim().toUpperCase();
+const err = document.getElementById('loginErr');
+err.textContent = '';
+if(!name){ err.textContent = 'Enter your name.'; return; }
+if(code !== GROUP_CODE.toUpperCase()){ err.textContent = 'Wrong code â ask the admin!'; return; }
+const id = 'u_' + name.toLowerCase().replace(/\s+/g,'_') + '_' + hashStr(name);
+currentUser = { id, name };
+localStorage.setItem('wc2026_user', JSON.stringify(currentUser));
+initApp();
 }
 
 function hashStr(s){
-  let h = 0;
-  for(let i=0;i<s.length;i++) h = (Math.imul(31,h) + s.charCodeAt(i)) | 0;
-  return Math.abs(h).toString(36).slice(0,6);
+let h = 0;
+for(let i=0;i<s.length;i++) h = (Math.imul(31,h) + s.charCodeAt(i)) | 0;
+return Math.abs(h).toString(36).slice(0,6);
 }
 
-// ════════════════════ INIT APP ════════════════════
+// ââââââââââââââââââââ INIT APP ââââââââââââââââââââ
 async function initApp(){
-  document.getElementById('loginScreen').style.display = 'none';
-  document.getElementById('mainApp').style.display = 'block';
-  document.getElementById('hdName').textContent = currentUser.name;
+document.getElementById('loginScreen').style.display = 'none';
+document.getElementById('mainApp').style.display = 'block';
+document.getElementById('hdName').textContent = currentUser.name;
 
-  // Logo tap => admin
-  document.getElementById('logoArea').addEventListener('click', ()=>{
-    logoTaps++;
-    if(logoTaps >= 5){ logoTaps=0; showAdminLogin(); }
-    setTimeout(()=>{ logoTaps=0; }, 2000);
-  });
+document.getElementById('logoArea').addEventListener('click', ()=>{
+logoTaps++;
+if(logoTaps >= 5){ logoTaps=0; showAdminLogin(); }
+setTimeout(()=>{ logoTaps=0; }, 2000);
+});
 
-  await Promise.all([loadSettings(), loadUserPicks(), loadResults()]);
-  renderGroups();
-  updateProgress();
-  updateBanner();
-  updateSaveBtn();
-  updateScore();
-  setInterval(updateBanner, 30000);
+await Promise.all([loadSettings(), loadUserPicks(), loadResults()]);
+// Always load playoff bracket so Schedule tab can show results even if tab is locked
+await loadPlayoffBracket();
+renderGroups();
+updateProgress();
+updateBanner();
+updateSaveBtn();
+updateScore();
+setInterval(updateBanner, 30000);
 }
 
-// ════════════════════ FIREBASE OPS ════════════════════
+// ââââââââââââââââââââ FIREBASE OPS ââââââââââââââââââââ
 async function loadSettings(){
-  try{
-    const doc = await db.collection('settings').doc('global').get();
-    if(doc.exists){
-      const d = doc.data();
-      playoffUnlocked = d.playoffUnlocked || false;
-      if(playoffUnlocked) await applyPlayoffUnlock();
-    }
-  } catch(e){ console.warn('Settings offline:', e.message); }
+try{
+const doc = await db.collection('settings').doc('global').get();
+if(doc.exists){
+const d = doc.data();
+playoffUnlocked = d.playoffUnlocked || false;
+if(playoffUnlocked) applyPlayoffUnlockUI();
+}
+} catch(e){ console.warn('Settings offline:', e.message); }
+}
+
+function applyPlayoffUnlockUI(){
+document.getElementById('tabBtn-playoffs').textContent = 'Playoffs';
+document.getElementById('playoffLocked').style.display = 'none';
+document.getElementById('playoffOpen').style.display = 'block';
+renderPlayoffBracket();
 }
 
 async function loadPlayoffBracket(){
-  try{
-    const doc = await db.collection('results').doc('playoff').get();
-    if(doc.exists) playoffBracket = doc.data() || {};
-    // Load user's playoff picks
-    const pdoc = await db.collection('picks').doc(currentUser.id).get();
-    if(pdoc.exists) playoffPicks = pdoc.data().playoffPicks || {};
-  } catch(e){ console.warn('Playoff data offline:', e.message); }
+try{
+const doc = await db.collection('results').doc('playoff').get();
+if(doc.exists) playoffBracket = doc.data() || {};
+const pdoc = await db.collection('picks').doc(currentUser.id).get();
+if(pdoc.exists) playoffPicks = pdoc.data().playoffPicks || {};
+} catch(e){ console.warn('Playoff data offline:', e.message); }
 }
 
 async function loadUserPicks(){
-  try{
-    const doc = await db.collection('picks').doc(currentUser.id).get();
-    if(doc.exists) picks = doc.data().picks || {};
-  } catch(e){ console.warn('Picks offline:', e.message); }
+try{
+const doc = await db.collection('picks').doc(currentUser.id).get();
+if(doc.exists) picks = doc.data().picks || {};
+} catch(e){ console.warn('Picks offline:', e.message); }
 }
 
 async function loadResults(){
-  try{
-    const doc = await db.collection('results').doc('groups').get();
-    if(doc.exists) results = doc.data() || {};
-  } catch(e){ console.warn('Results offline:', e.message); }
+try{
+const doc = await db.collection('results').doc('groups').get();
+if(doc.exists) results = doc.data() || {};
+} catch(e){ console.warn('Results offline:', e.message); }
 }
 
 async function savePicks(){
-  if(deadlinePassed()){ toast('⏰ Picks deadline has passed','err'); return; }
-  const done = completedCount();
-  if(done < 12){ toast(`Complete all 12 groups first (${done}/12 done)`,'err'); return; }
+if(deadlinePassed()){ toast('â° Picks deadline has passed','err'); return; }
+const done = completedCount();
+if(done < 12){ toast(`Complete all 12 groups first (${done}/12 done)`,'err'); return; }
 
-  const btn = document.getElementById('saveBtn');
-  btn.textContent = 'Saving…'; btn.disabled = true;
+const btn = document.getElementById('saveBtn');
+btn.textContent = 'Savingâ¦'; btn.disabled = true;
 
-  try{
-    const gs = calculateScore();
-    const ps = calculatePlayoffScore();
-    await db.collection('picks').doc(currentUser.id).set({
-      name: currentUser.name,
-      picks,
-      savedAt: firebase.firestore.FieldValue.serverTimestamp(),
-      score: gs,
-      playoffScore: ps,
-      totalScore: gs + ps
-    }, { merge: true });
+try{
+const gs = calculateScore();
+const ps = calculatePlayoffScore();
+await db.collection('picks').doc(currentUser.id).set({
+name: currentUser.name,
+picks,
+savedAt: firebase.firestore.FieldValue.serverTimestamp(),
+score: gs,
+playoffScore: ps,
+totalScore: gs + ps
+}, { merge: true });
 
-    btn.textContent = '✅ Saved!'; btn.classList.add('saved');
-    toast('✅ Picks saved!');
-    setTimeout(()=>{ btn.textContent='💾 Save My Picks'; btn.disabled=false; btn.classList.remove('saved'); }, 3500);
-  } catch(e){
-    toast('❌ Save failed — check connection','err');
-    btn.textContent='💾 Save My Picks'; btn.disabled=false;
-  }
+btn.textContent = 'â Saved!'; btn.classList.add('saved');
+toast('â Picks saved!');
+setTimeout(()=>{ btn.textContent='ð¾ Save My Picks'; btn.disabled=false; btn.classList.remove('saved'); }, 3500);
+} catch(e){
+toast('â Save failed â check connection','err');
+btn.textContent='ð¾ Save My Picks'; btn.disabled=false;
+}
 }
 
 async function loadLeaderboard(){
-  try{
-    let snap;
-    try { snap = await db.collection('picks').orderBy('totalScore','desc').limit(60).get(); }
-    catch(e){ snap = await db.collection('picks').orderBy('score','desc').limit(60).get(); }
-    const rows = [];
-    snap.forEach(d => rows.push({ id:d.id, ...d.data() }));
-    renderLeaderboard(rows);
-  } catch(e){
-    renderLeaderboard(currentUser ? [{
-      id: currentUser.id, name: currentUser.name,
-      picks, score: calculateScore(), playoffScore: calculatePlayoffScore(),
-      totalScore: calculateScore() + calculatePlayoffScore()
-    }] : []);
-  }
+try{
+let snap;
+try { snap = await db.collection('picks').orderBy('totalScore','desc').limit(60).get(); }
+catch(e){ snap = await db.collection('picks').orderBy('score','desc').limit(60).get(); }
+const rows = [];
+snap.forEach(d => rows.push({ id:d.id, ...d.data() }));
+renderLeaderboard(rows);
+} catch(e){
+renderLeaderboard(currentUser ? [{
+id: currentUser.id, name: currentUser.name,
+picks, score: calculateScore(), playoffScore: calculatePlayoffScore(),
+totalScore: calculateScore() + calculatePlayoffScore()
+}] : []);
+}
 }
 
-// ════════════════════ PICKS LOGIC ════════════════════
+// ââââââââââââââââââââ PICKS LOGIC ââââââââââââââââââââ
 function toggleTeam(group, team){
-  if(deadlinePassed()) return;
-  if(!picks[group]) picks[group] = [];
-  const idx = picks[group].indexOf(team);
-  if(idx !== -1){
-    picks[group] = picks[group].slice(0, idx); // deselect this and all after
-  } else {
-    if(picks[group].length < 4) picks[group].push(team);
-  }
-  renderGroup(group);
-  updateProgress();
-  updateSaveBtn();
+if(deadlinePassed()) return;
+if(!picks[group]) picks[group] = [];
+const idx = picks[group].indexOf(team);
+if(idx !== -1){
+picks[group] = picks[group].slice(0, idx);
+} else {
+if(picks[group].length < 4) picks[group].push(team);
+}
+renderGroup(group);
+updateProgress();
+updateSaveBtn();
 }
 
-// ════════════════════ SCORING ════════════════════
+// ââââââââââââââââââââ SCORING ââââââââââââââââââââ
 function scoreGroup(userPicks, actual, gp = {}){
-  if(!actual || actual.length < 4) return 0;
-  let pts = 0;
-  const PTS = [4,3,2,1];
-  const played = (team) => (gp[team] || 0) > 0;
-  for(let i=0;i<4;i++){
-    if(!userPicks[i]) continue;
-    if(userPicks[i] === actual[i] && played(actual[i])){
-      let p = PTS[i];
-      // Bonus: exact 3rd place pick AND that team also advanced from 3rd = 3pts total
-      if(i === 2 && THIRD_PLACE_QUALIFIERS.has(userPicks[i])) p += 1;
-      pts += p;
-    } else if(i < 2){
-      // picked for top 2 — did they actually advance to top 2?
-      if((actual[0] === userPicks[i] && played(actual[0])) || (actual[1] === userPicks[i] && played(actual[1]))) pts += 2;
-    }
-  }
-  return pts;
+if(!actual || actual.length < 4) return 0;
+let pts = 0;
+const PTS = [4,3,2,1];
+const played = (team) => (gp[team] || 0) > 0;
+for(let i=0;i<4;i++){
+if(!userPicks[i]) continue;
+if(userPicks[i] === actual[i] && played(actual[i])){
+let p = PTS[i];
+if(i === 2 && THIRD_PLACE_QUALIFIERS.has(userPicks[i])) p += 1;
+pts += p;
+} else if(i < 2){
+if((actual[0] === userPicks[i] && played(actual[0])) || (actual[1] === userPicks[i] && played(actual[1]))) pts += 2;
+}
+}
+return pts;
 }
 
 function calculateScore(){
-  let total = 0;
-  const gpAll = results._gamesPlayed || {};
-  for(const g of Object.keys(GROUPS)){
-    if(picks[g] && results[g]) total += scoreGroup(picks[g], results[g], gpAll[g]);
-  }
-  return total;
+let total = 0;
+const gpAll = results._gamesPlayed || {};
+for(const g of Object.keys(GROUPS)){
+if(picks[g] && results[g]) total += scoreGroup(picks[g], results[g], gpAll[g]);
+}
+return total;
 }
 
 function calculatePlayoffScore(){
-  let total = 0;
-  for(const round of PLAYOFF_ROUNDS){
-    const count = ROUND_COUNTS[round];
-    for(let i=0; i<count; i++){
-      const key = `${round}-${i}`;
-      const actual = playoffBracket[round]?.[i]?.winner;
-      if(actual && playoffPicks[key] === actual) total += ROUND_PTS[round];
-    }
-  }
-  return total;
+let total = 0;
+for(const round of PLAYOFF_ROUNDS){
+const count = ROUND_COUNTS[round];
+for(let i=0; i<count; i++){
+const key = `${round}-${i}`;
+const actual = playoffBracket[round]?.[i]?.winner;
+if(actual && playoffPicks[key] === actual) total += ROUND_PTS[round];
+}
+}
+return total;
 }
 
 function updateScore(){
-  const total = calculateScore() + calculatePlayoffScore();
-  document.getElementById('hdScore').textContent = total + ' pts';
+const total = calculateScore() + calculatePlayoffScore();
+document.getElementById('hdScore').textContent = total + ' pts';
 }
 
-// ════════════════════ RENDERING ════════════════════
+// ââââââââââââââââââââ RENDERING ââââââââââââââââââââ
 function renderGroups(){
-  const c = document.getElementById('groupsContainer');
-  c.innerHTML = '';
-  for(const letter of Object.keys(GROUPS)){
-    const div = document.createElement('div');
-    div.className = 'g-card';
-    div.id = 'gc-' + letter;
-    c.appendChild(div);
-    renderGroup(letter);
-  }
+const c = document.getElementById('groupsContainer');
+c.innerHTML = '';
+for(const letter of Object.keys(GROUPS)){
+const div = document.createElement('div');
+div.className = 'g-card';
+div.id = 'gc-' + letter;
+c.appendChild(div);
+renderGroup(letter);
+}
 }
 
 function renderGroup(letter){
-  const el = document.getElementById('gc-' + letter);
-  if(!el) return;
-  const teams  = GROUPS[letter];
-  const gp     = picks[letter] || [];   // user's picks
-  const gr     = results[letter] || null; // actual results
-  const done   = gp.length === 4;
-  const locked = deadlinePassed();
+const el = document.getElementById('gc-' + letter);
+if(!el) return;
+const teams = GROUPS[letter];
+const gp = picks[letter] || [];
+const gr = results[letter] || null;
+const done = gp.length === 4;
+const locked = deadlinePassed();
 
-  // Slot content
-  const slotsHTML = ORDINALS.map((ord, i) => {
-    const team      = gp[i];
-    const isAdv     = i < 2;
-    // 3rd-place slot: highlight if user's pick is one of the 8 advancing 3rd-place teams
-    const isThirdQ  = i === 2 && team && THIRD_PLACE_QUALIFIERS.has(team);
-    // Also check: if results are in, show actual 3rd-place qualifier even if user got it wrong
-    const actualThirdQ = i === 2 && gr && gr.length === 4 && THIRD_PLACE_QUALIFIERS.has(gr[2]);
+const slotsHTML = ORDINALS.map((ord, i) => {
+const team = gp[i];
+const isAdv = i < 2;
+const isThirdQ = i === 2 && team && THIRD_PLACE_QUALIFIERS.has(team);
+const actualThirdQ = i === 2 && gr && gr.length === 4 && THIRD_PLACE_QUALIFIERS.has(gr[2]);
 
-    let ptsTip = '';
-    if(team && gr && gr.length === 4){
-      const single = singlePickPts(gp, gr, i);
-      if(single > 0) ptsTip = `<div class="slot-pts" style="color:var(--green)">+${single}</div>`;
-      else if(gr.length === 4) ptsTip = `<div class="slot-pts" style="color:var(--red)">0</div>`;
-    }
-
-    const posClass  = isAdv ? 'adv' : isThirdQ ? 'third-q' : '';
-    const slotClass = team ? (isThirdQ ? 'filled third-qualified' : 'filled') : (actualThirdQ && !team ? 'third-qualified' : '');
-    const posLabel  = isThirdQ ? `${ord} ★` : (actualThirdQ && !team ? `${ord} ★` : ord);
-
-    return `<div class="slot ${slotClass}">
-      <div class="slot-pos ${posClass}">${posLabel}</div>
-      ${team
-        ? `<div class="slot-flag">${FLAGS[team]||'🏳️'}</div>
-           <div class="slot-abbr">${abbr(team)}</div>
-           ${ptsTip}`
-        : `<div class="slot-empty">—</div>`}
-    </div>`;
-  }).join('');
-
-  // Team buttons
-  const teamsHTML = teams.map(team => {
-    const pos = gp.indexOf(team);
-    const isPicked = pos !== -1;
-    return `<button class="team-btn ${isPicked?'picked':''} ${locked?'picks-locked':''}"
-      onclick="${locked ? '' : `toggleTeam('${letter}','${team.replace(/'/g,"\\'")}')`}">
-      <span class="t-flag">${FLAGS[team]||'🏳️'}</span>
-      <span class="t-name">${team}</span>
-      ${isPicked ? `<span class="t-badge">${pos+1}</span>` : ''}
-    </button>`;
-  }).join('');
-
-  el.className = 'g-card' + (done ? ' complete' : '');
-  el.innerHTML = `
-    <div class="g-head">
-      <span class="g-title">Group ${letter}</span>
-      <span class="g-status ${done?'done':''}">${done ? '✓ Complete' : gp.length+'/4 picked'}</span>
-    </div>
-    <div class="g-body">
-      <div class="slots">${slotsHTML}</div>
-      <div class="teams">${teamsHTML}</div>
-    </div>`;
+let ptsTip = '';
+if(team && gr && gr.length === 4){
+const single = singlePickPts(gp, gr, i);
+if(single > 0) ptsTip = `<div class="slot-pts" style="color:var(--green)">+${single}</div>`;
+else if(gr.length === 4) ptsTip = `<div class="slot-pts" style="color:var(--red)">0</div>`;
 }
 
-function singlePickPts(gp, gr, i){
-  if(!gp[i] || !gr || gr.length < 4) return 0;
-  const PTS = [4,3,2,1];
-  if(gp[i] === gr[i]){
-    let p = PTS[i];
-    if(i === 2 && THIRD_PLACE_QUALIFIERS.has(gp[i])) p += 1;
-    return p;
-  }
-  if(i < 2 && (gr[0] === gp[i] || gr[1] === gp[i])) return 2;
-  return 0;
-}
+const posClass = isAdv ? 'adv' : isThirdQ ? 'third-q' : '';
+const slotClapÈHX[HÈ
+\Õ\HÈ	Ù[Y\\]X[YYY	È	Ù[Y	ÊH
+XÝX[\H	]X[HÈ	Ý\\]X[YYY	È	ÉÊNÂÛÛÝÜÓX[H\Õ\HÈ	ÛÜH8¦!X
+XÝX[\H	]X[HÈ	ÛÜH8¦!XÜ
+NÂ]\]Û\ÜÏHÛÝ	ÜÛÝÛ\ÜßH]Û\ÜÏHÛÝ\ÜÈ	ÜÜÐÛ\ÜßHÜÜÓX[OÙ]ÝX[BÈ]Û\ÜÏHÛÝYYÈÑQÔÖÝX[W_	ü'ãìûî#ÉßOÙ]]Û\ÜÏHÛÝXXØXX[J_OÙ]ÜÕ\X]Û\ÜÏHÛÝY[\H¸ %Ù]BÙ]ÂJKÚ[	ÉÊNÂÛÛÝX[\ÒSHX[\ËX\
+X[HOÂÛÛÝÜÈHÜ[^ÙX[JNÂÛÛÝ\ÔXÚÙYHÜÈOOHLNÂ]\]ÛÛ\ÜÏHX[KX	Ú\ÔXÚÙYÉÜXÚÙY	ÎÉßH	ÛØÚÙYÉÜXÚÜË[ØÚÙY	ÎÉßHÛÛXÚÏHÛØÚÙYÈ	ÉÈÙÙÛUX[J	ÉÛ]\IË	ÉÝX[K\XÙJÉËÙË	È_IÊXHÜ[Û\ÜÏHYYÈÑQÔÖÝX[W_	ü'ãìûî#ÉßOÜÜ[Ü[Û\ÜÏH[[YHÝX[_OÜÜ[Ú\ÔXÚÙYÈÜ[Û\ÜÏHXYÙHÜÜÊÌ_OÜÜ[	ÉßBØ]ÛÂJKÚ[	ÉÊNÂ[Û\ÜÓ[YHH	ÙËXØ\	È
+È
+ÛHÈ	ÈÛÛ\]IÈ	ÉÊNÂ[[\SH]Û\ÜÏHËZXYÜ[Û\ÜÏHË]]HÜÝ\	Û]\OÜÜ[Ü[Û\ÜÏHË\Ý]\È	ÙÛOÉÙÛIÎÉßHÙÛHÈ	ø§$ÈÛÛ\]IÈÜ[Ý
+ÉËÍXÚÙY	ßOÜÜ[Ù]]Û\ÜÏHËXÙH]Û\ÜÏHÛÝÈÜÛÝÒSOÙ]]Û\ÜÏHX[\ÈÝX[\ÒSOÙ]Ù]ÂB[Ý[ÛÚ[ÛTXÚÔÊÜÜJ^ÂYYÜÚWHYÜÜ[Ý
+H]\ÂÛÛÝÈHÍËWNÂYÜÚWHOOHÜÚWJ^Â]HÖÚWNÂYHOOH	TÔPÑWÔUPSQQTË\ÊÜÚWJJH
+ÏHNÂ]\ÂBYH	
+ÜÌHOOHÜÚWHÜÌWHOOHÜÚWJJH]\Â]\ÂBËÈ8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥dÐÒQSH8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d[Ý[Û[\ØÚY[J
+^ÂÛÛÝÈHØÝ[Y[Ù][[Y[RY
+	ÜØÚY[PÛÛZ[\ÊNÂYXÊH]\ÂÛÛÝÙ^TÝH]È]J
+KÒTÓÔÝ[Ê
+KÛXÙJL
+NÂËÈÜÝ\ÌØ[Y\ÈH]BÛÛÝQ]HHßNÂÜÛÛÝ][HÙÌÔÐÒQSJ^ÂYXQ]VÚ][K]WJHQ]VÚ][K]WHH×NÂQ]VÚ][K]WK\Ú
+][KX]ÚY
+NÂB][H]Û\ÜÏHÙXÝ[Û[X[Ý[ÙÌÙ]ÂÜÛÛÝÙ]KY\ÝHÙØXÝ[Y\ÊQ]JJ^ÂÛÛÝ\ÕÙ^HH]HOOHÙ^TÝÂÛÛÝ\Ô\ÝH]HÙ^TÝÂÛÛÝH]È]J]H
+È	ÕLÊNÂÛÛÝX[HÓØØ[Q]TÝ[Ê	Ù[UTÉËÈÙYZÙ^NÜÚÜ	Ë[ÛÜÚÜ	Ë^NÛ[Y\XÉÈJNÂÛÛÝ^PÛ\ÜÈH\ÕÙ^HÈ	ÝÙ^IÈ\Ô\ÝÈ	Ü\Ý	È	ÉÎÂÛÛÝ^SÝHH\ÕÙ^HÈ	È0­ÈÑVIÈ	ÉÎÂ[
+ÏH]Û\ÜÏHØÚYY]KYÜÝ\	Ù^PÛ\ÜßH]Û\ÜÏHØÚYY]K[X[ÛX[IÙ^SÝ_OÙ]ÂÜÛÛÝX]ÚYÙY\Ý
+^ÂÛÛÝÈÛYK]Ø^HHHÌÐPÒÑUÛX]ÚYNÂÛÛÝÚ[\H^[ÙXÚÙ]ÉÔÌ×OËÛX]ÚYOËÚ[\[ÂÛÛÝÛYUÛÛHÚ[\OOHÛYNÂÛÛÝ]Ø^UÛÛHÚ[\OOH]Ø^NÂ[
+ÏH]Û\ÜÏHØÚY[X]Ú]Û\ÜÏHØÚY]X[H	ÚÛYUÛÛÈ	ÝÛÛÈ]Ø^UÛÛÈ	ÛÜÝ	È	ÉßHÜ[Û\ÜÏHØÚYYYÈÑQÔÖÚÛYW_	ü'ãìûî#ÉßOÜÜ[Ü[Û\ÜÏHØÚY[[YHÚÛY_OÜÜ[Ù]]Û\ÜÏHØÚY]ÈÝÚ[\È	ø§$ÉÈ	ÝÉßOÙ]]Û\ÜÏHØÚY]X[HYÚ	Ø]Ø^UÛÛÈ	ÝÛÛÈÛYUÛÛÈ	ÛÜÝ	È	ÉßHÜ[Û\ÜÏHØÚY[[YHØ]Ø^_OÜÜ[Ü[Û\ÜÏHØÚYYYÈÑQÔÖØ]Ø^W_	ü'ãìûî#ÉßOÜÜ[Ù]Ù]ÂB[
+ÏHÙ]ÂBËÈMXÙZÛ\ÛÛÝMÚ[\ÈH^[ÙXÚÙ]ÉÔÌ×HÈ^[ÙXÚÙ]ÉÔÌ×K[\HOOËÚ[\K[ÝÂYMÚ[\ÈHM^Â[
+ÏH]Û\ÜÏHØÚY\Ý[]]HÝ[ÙMÙ]ÂËÈÚÝÈMX]Ú\È\]YÛHÌÚ[\ÂÛÛÝMH×NÂÜ]OLÚOÚJÊÊ^ÂÛÛÝÛYHH^[ÙXÚÙ]ÉÔÌ×OËÚJOËÚ[\[ÂÛÛÝ]Ø^HH^[ÙXÚÙ]ÉÔÌ×OËÚJÌWOËÚ[\[ÂÛÛÝÚ[\H^[ÙXÚÙ]ÉÔM×OËÚWOËÚ[\[ÂM\Ú
+ÚÛYK]Ø^KÚ[\JNÂB[
+ÏH]Û\ÜÏHØÚYY]KYÜÝ\]Û\ÜÏHØÚYY]K[X[[
+H8 $ÈÙ]ÂÜÛÛÝHÙM^ÂY[KÛYH	[K]Ø^JHÛÛ[YNÂÛÛÝÛYUÛÛHKÚ[\OOHKÛYNÂÛÛÝ]Ø^UÛÛHKÚ[\OOHK]Ø^NÂ[
+ÏH]Û\ÜÏHØÚY[X]Ú]Û\ÜÏHØÚY]X[H	ÚÛYUÛÛÈ	ÝÛÛÈ]Ø^UÛÛÈ	ÛÜÝ	È	ÉßHÜ[Û\ÜÏHØÚYYYÈÑQÔÖÛKÛYW_	ü'ãìûî#ÉßOÜÜ[Ü[Û\ÜÏHØÚY[[YHÛKÛYH	Õ	ßOÜÜ[Ù]]Û\ÜÏHØÚY]ÈÛKÚ[\È	ø§$ÉÈ	ÝÉßOÙ]]Û\ÜÏHØÚY]X[HYÚ	Ø]Ø^UÛÛÈ	ÝÛÛÈÛYUÛÛÈ	ÛÜÝ	È	ÉßHÜ[Û\ÜÏHØÚY[[YHÛK]Ø^H	Õ	ßOÜÜ[Ü[Û\ÜÏHØÚYYYÈÑQÔÖÛK]Ø^W_	ü'ãìûî#ÉßOÜÜ[Ù]Ù]ÂB[
+ÏHÙ]ÂH[ÙHÂ[
+ÏH]Û\ÜÏHØÚY\Ý[]]HÝ[ÙMÙ]]Û\ÜÏHØÚY]\ÛÛZ[Ë[ÝH¸£ìÈ]Z[XHÛÙHÌÛÛ\]\È
+[
+x $Î
+OÙ]ÂBËÈQÔÑÑÛÛÝYÚ[\ÈH^[ÙXÚÙ]ÉÔM×HÈ^[ÙXÚÙ]ÉÔM×K[\HOOËÚ[\K[ÝÂ[
+ÏH]Û\ÜÏHØÚY\Ý[]]H]X\\[[È	[\È^[ÛÙ]ÂYYÚ[\ÈH
+^Â[
+ÏH]Û\ÜÏHØÚY]\ÛÛZ[Ë[ÝH[L¸ $ÌLÈ0­È[M¸ $ÌMÈ0­È[[[NOÙ]ÂH[ÙHÂ[
+ÏH]Û\ÜÏHØÚY]\ÛÛZ[Ë[ÝH¸£ìÈQ[L¸ $ÌLÈ0­ÈÑ[M¸ $ÌMÈ0­È[[[NOÙ]ÂBË[\SH[ÂB[Ý[Û[\XY\Ø\
+ÝÜÊ^ÂÛÛÝÈHØÝ[Y[Ù][[Y[RY
+	ÛÛÛZ[\ÊNÂY\ÝÜË[Ý
+^ÈË[\SH	Ï]Û\ÜÏH[\HÈXÚÜÈÝXZ]YY]8 %H\ÝOÙ]ÎÈ]\ÈBÝÜËÛÜ
 
-function renderLeaderboard(rows){
-  const c = document.getElementById('lbContainer');
-  if(!rows.length){ c.innerHTML = '<div class="empty">No picks submitted yet — be first!</div>'; return; }
+KHO
 
-  // Sort by totalScore descending
-  rows.sort((a,b) => ((b.totalScore||b.score||0) - (a.totalScore||a.score||0)));
+Ý[ØÛÜ_ØÛÜ_
+HH
+KÝ[ØÛÜ_KØÛÜ_
+JJNÂË[\SHÝÜËX\
 
-  c.innerHTML = rows.map((row, i) => {
-    const isMe = row.id === currentUser.id;
-    const r = i + 1;
-    const rankDisp = r===1?'🥇':r===2?'🥈':r===3?'🥉':r;
-    const gScore = row.score || 0;
-    const pScore = row.playoffScore || 0;
-    const total  = row.totalScore != null ? row.totalScore : gScore;
-    return `<div class="lb-item ${isMe?'me':''}">
-      <div class="lb-rank">${rankDisp}</div>
-      <div class="lb-info">
-        <div class="lb-name">${row.name}${isMe?' <span style="color:var(--accent);font-size:11px">(you)</span>':''}</div>
-      </div>
-      <div class="lb-scores">
-        <div class="lb-score-block">
-          <div class="lb-score-val">${gScore}</div>
-          <div class="lb-score-lbl">Groups</div>
-        </div>
-        <div class="lb-divider"></div>
-        <div class="lb-score-block">
-          <div class="lb-score-val">${pScore}</div>
-          <div class="lb-score-lbl">Playoffs</div>
-        </div>
-        <div class="lb-divider"></div>
-        <div class="lb-score-block">
-          <div class="lb-score-val total-pts">${total}</div>
-          <div class="lb-score-lbl">Total</div>
-        </div>
-      </div>
-    </div>`;
-  }).join('');
-}
+ÝËJHOÂÛÛÝ\ÓYHHÝËYOOHÝ\[\Ù\YÂÛÛÝHH
+ÈNÂÛÛÝ[Ñ\ÜHOOLOÉü'éaÉÎOOLÉü'éb	ÎOOLÏÉü'ébIÎÂÛÛÝÔØÛÜHHÝËØÛÜHÂÛÛÝØÛÜHHÝË^[ÙØÛÜHÂÛÛÝÝ[HÝËÝ[ØÛÜHOH[ÈÝËÝ[ØÛÜHÔØÛÜNÂ]\]Û\ÜÏHZ][H	Ú\ÓYOÉÛYIÎÉßH]Û\ÜÏH\[ÈÜ[Ñ\ÜOÙ]]Û\ÜÏHZ[È]Û\ÜÏH[[YHÜÝË[Y_IÚ\ÓYOÉÈÜ[Ý[OHÛÛÜ\KXXØÙ[
+NÙÛ\Ú^NL\[ÝJOÜÜ[ÎÉßOÙ]Ù]]Û\ÜÏH\ØÛÜ\È]Û\ÜÏH\ØÛÜKXØÚÈ]Û\ÜÏH\ØÛÜK][ÙÔØÛÜ_OÙ]]Û\ÜÏH\ØÛÜK[ÜÝ\ÏÙ]Ù]]Û\ÜÏHY]Y\Ù]]Û\ÜÏH\ØÛÜKXØÚÈ]Û\ÜÏH\ØÛÜK][ÜØÛÜ_OÙ]]Û\ÜÏH\ØÛÜK[^[ÙÏÙ]Ù]]Û\ÜÏHY]Y\Ù]]Û\ÜÏH\ØÛÜKXØÚÈ]Û\ÜÏH\ØÛÜK][Ý[\ÈÝÝ[OÙ]]Û\ÜÏH\ØÛÜK[Ý[Ù]Ù]Ù]Ù]ÂJKÚ[	ÉÊNÂBËÈ8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥dRHSTÈ8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d[Ý[ÛÚÝÕXX^ÂÉÙÜÝ\ÉË	ÜØÚY[IË	Ü^[ÙÉË	ÛXY\Ø\	×KÜXXÚ
+OÂØÝ[Y[Ù][[Y[RY
+	Ü[KIÈ
+È
+KÝ[K\Ü^HHOOHXÈ	ØØÚÉÈ	ÛÛIÎÂØÝ[Y[Ù][[Y[RY
+	ÝXIÈ
+È
+KÛ\ÜÓ\ÝÙÙÛJ	ØXÝ]IËOOHXNÂJNÂØÝ[Y[Ù][[Y[RY
+	ÜØ]P\ÊKÝ[K\Ü^HHXOOH	ÙÜÝ\ÉÈÈ	ØØÚÉÈ	ÛÛIÎÂYXOOH	ÛXY\Ø\	ÊHØYXY\Ø\
 
-// ════════════════════ UI HELPERS ════════════════════
-function showTab(tab){
-  ['groups','playoffs','leaderboard'].forEach(t => {
-    document.getElementById('pane-' + t).style.display = t === tab ? 'block' : 'none';
-    document.getElementById('tabBtn-' + t).classList.toggle('active', t === tab);
-  });
-  document.getElementById('saveBar').style.display = tab === 'groups' ? 'block' : 'none';
-  if(tab === 'leaderboard') loadLeaderboard();
-}
+NÂYXOOH	ÜØÚY[IÊH[\ØÚY[J
+NÂB[Ý[Û\]TÙÜ\ÜÊ
+^ÂÛÛÝÛHHÛÛ\]YÛÝ[
 
-function updateProgress(){
-  const done = completedCount();
-  document.getElementById('progressText').textContent = done + ' / 12';
-  document.getElementById('progressBar').style.width = (done/12*100) + '%';
-}
+NÂØÝ[Y[Ù][[Y[RY
+	ÜÙÜ\ÜÕ^	ÊK^ÛÛ[HÛH
+È	ÈÈLÎÂØÝ[Y[Ù][[Y[RY
+	ÜÙÜ\ÜÐ\ÊKÝ[KÚYH
+ÛKÌLL
+H
+È	ÉIÎÂB[Ý[Û\]TØ]P
+^ÂÛÛÝHØÝ[Y[Ù][[Y[RY
+	ÜØ]PÊNÂÛÛÝÛHHÛÛ\]YÛÝ[
 
-function updateSaveBtn(){
-  const btn = document.getElementById('saveBtn');
-  const done = completedCount();
-  if(deadlinePassed()){
-    btn.textContent = '🔒 Picks Are Locked'; btn.disabled = true;
-  } else if(done < 12){
-    btn.textContent = `Complete all groups to save (${done}/12)`; btn.disabled = false;
-  } else {
-    btn.textContent = '💾 Save My Picks'; btn.disabled = false;
-  }
-}
+NÂYXY[T\ÜÙY
 
-function updateBanner(){
-  const b = document.getElementById('deadlineBanner');
-  const now = new Date();
-  if(now >= PICK_DEADLINE){
-    b.className = 'banner locked';
-    b.textContent = '🔒 Picks locked — group stage is live!';
-  } else {
-    const diff = PICK_DEADLINE - now;
-    const d = Math.floor(diff/864e5);
-    const h = Math.floor((diff%864e5)/36e5);
-    const m = Math.floor((diff%36e5)/6e4);
-    const str = d>0 ? `${d}d ${h}h` : h>0 ? `${h}h ${m}m` : `${m}m`;
-    b.className = 'banner';
-    b.textContent = `⏰ Picks lock in ${str} — Deadline: Jun 11, 4:00 PM ET`;
-  }
-}
+J^Â^ÛÛ[H	ü'å$XÚÜÈ\HØÚÙY	ÎÈ\ØXYHYNÂH[ÙHYÛHL^Â^ÛÛ[HÛÛ\]H[ÜÝ\ÈÈØ]H
+	ÙÛ_KÌLXÈ\ØXYH[ÙNÂH[ÙHÂ^ÛÛ[H	ü'ä¯Ø]H^HXÚÜÉÎÈ\ØXYH[ÙNÂBB[Ý[Û\]P[\
+^ÂÛÛÝHØÝ[Y[Ù][[Y[RY
+	ÙXY[P[\ÊNÂÛÛÝÝÈH]È]J
+NÂYÝÈHPÒ×ÑPQSJ^ÂÛ\ÜÓ[YHH	Ø[\ØÚÙY	ÎÂ^ÛÛ[H	ü'å$XÚÜÈØÚÙY8 %ÜÝ\ÝYÙH\È]HIÎÂH[ÙHÂÛÛÝYHPÒ×ÑPQSHHÝÎÂÛÛÝHX]ÛÜYÎ
+MJNÂÛÛÝHX]ÛÜ
+YN
+MJKÌÍMJNÂÛÛÝHHX]ÛÜ
+YLÍMJKÍM
+NÂÛÛÝÝHÈ	ÙY	ÚZÈ	ÚZ	Û_[X	Û_[XÂÛ\ÜÓ[YHH	Ø[\ÎÂ^ÛÛ[H8£ìXÚÜÈØÚÈ[	ÜÝH8 %XY[N[LK
+HUÂBBËÈ8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥dVSÑPÒÑU8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d[Ý[ÛÙ]X]ÚX[\ÊÝ[Y
+^ÂYÝ[OOH	ÔÌÊ^ÂÛÛÝHH^[ÙXÚÙ]ÉÔÌ×OËÚYNÂYH	KÛYH	K]Ø^JH]\ÈÛYNKÛYK]Ø^NK]Ø^HNÂ]\ÌÐPÒÑUÚYHÈÛYN[]Ø^N[NÂBÛÛÝHHVSÑÔÕSË[^ÙÝ[
+NÂYHH
+H]\ÈÛYN[]Ø^N[NÂÛÛÝ]HVSÑÔÕSÖÜHHWNÂ]\ÂÛYN^[ÙXÚÜÖØ	Ü]KIÚY
+XH[]Ø^N^[ÙXÚÜÖØ	Ü]KIÚY
+Ì_XH[NÂB[Ý[Û[\^[ÙXÚÙ]
 
-async function applyPlayoffUnlock(){
-  document.getElementById('tabBtn-playoffs').textContent = 'Playoffs';
-  document.getElementById('playoffLocked').style.display = 'none';
-  document.getElementById('playoffOpen').style.display = 'block';
-  await loadPlayoffBracket();
-  renderPlayoffBracket();
-}
+^ÂÛÛÝÈHØÝ[Y[Ù][[Y[RY
+	Ü^[ÙXÚÙ]ÛÛZ[\ÊNÂYXÊH]\ÂÛÛÝØÚÙYH]È]J
+HHVSÑÑPQSNÂ][H	ÉÎÂÜÛÛÝÝ[ÙVSÑÔÕSÊ^ÂÛÛÝÛÝ[HÕSÐÓÕSÖÜÝ[NÂ[
+ÏH]Û\ÜÏHÝ[\ÙXÝ[Û]Û\ÜÏHÝ[ZXY\Ü[ÔÕSÓPSÖÜÝ[_OÜÜ[Ü[Û\ÜÏHÝ[\ËXYÙHÔÕSÔÖÜÝ[_H	ÔÕSÔÖÜÝ[OOÉÜÉÎÉßKØÛÜXÝÜÜ[Ù]ÂÜ]OLÈOÛÝ[ÈJÊÊ^ÂÛÛÝÚÛYK]Ø^_HHÙ]X]ÚX[\ÊÝ[JNÂÛÛÝÙ^HH	ÜÝ[KIÚ_XÂÛÛÝ\Ù\XÚÈH^[ÙXÚÜÖÚÙ^WNÂÛÛÝXÝX[H^[ÙXÚÙ]ÜÝ[OËÚWOËÚ[\[ÂÛÛÝX[PH
+X[JHOÂY]X[JH]\]ÛÛ\ÜÏHË]X[H\ØXYÜ[Û\ÜÏHËYYÈ¼'ãìûî#ÏÜÜ[Ü[Û\ÜÏHË[[YHÜÜ[Ø]ÛÂÛÛÝ\ÔXÚÙYH\Ù\XÚÈOOHX[NÂÛÛÝ\ÐÛÜXÝHXÝX[	\ÔXÚÙY	XÝX[OOHX[NÂÛÛÝ\ÕÜÛÈHXÝX[	\ÔXÚÙY	XÝX[OOHX[NÂ]ÛÈH	ÜË]X[IÎÂY\ÔXÚÙY
+^ÈÛÈ
+ÏH\ÐÛÜXÝÈ	ÈÛÜXÝ	È\ÕÜÛÈÈ	ÈÜÛÉÈ	ÈXÚÙY	ÎÈBÛÛÝÚXÚÈH\ÐÛÜXÝÈ	ø§!IÈ\ÕÜÛÈÈ	ø§c	È\ÔXÚÙYÈ	ø§$ÉÈ	ÉÎÂÛÛÝØYHHX[K\XÙJÉËÙË	ÈNÂÛÛÝÛXÚÈHØÚÙYÈ	ÉÈXÚÔ^[ÙÚ[\	ÉÜÝ[IË	Ú_K	ÉÜØY_IÊXÂ]\]ÛÛ\ÜÏHØÛßHÛÛXÚÏHØÛXÚßH	ÛØÚÙYÉÙ\ØXY	ÎÉßOÜ[Û\ÜÏHËYYÈÑQÔÖÝX[W_	ü'ãìûî#ÉßOÜÜ[Ü[Û\ÜÏHË[[YHÝX[_OÜÜ[ØÚXÚÏØÜ[Û\ÜÏHËXÚXÚÈØÚXÚßOÜÜ[ÉßBØ]ÛÂNÂÛÛÝX]ÚX[HÝ[OOH	ÑÈÈ	ÐÚ[\[ÛÚ\	ÈX]Ú	ÚJÌ_XÂ[
+ÏH]Û\ÜÏHX]ÚXØ\]Û\ÜÏHX]Ú[[HÛX]ÚX[OÙ]]Û\ÜÏHX]Ú]X[\ÈÝX[PÛYJ_IÝX[P]Ø^J_OÙ]Ù]ÂB[
+ÏHÙ]ÂBË[\SH[Â\]T^[ÙØ]P
+NÂB[Ý[ÛXÚÔ^[ÙÚ[\Ý[X]ÚYX[J^ÂY]È]J
+HHVSÑÑPQSJ^ÈØ\Ý
+	ø£ì^[ÙXÚÜÈ\HØÚÙY	Ë	Ù\ÊNÈ]\ÈBÛÛÝÙ^HH	ÜÝ[KIÛX]ÚYXÂY^[ÙXÚÜÖÚÙ^WHOOHX[J^Â[]H^[ÙXÚÜÖÚÙ^WNÂÛX\ÝÛÝX[TXÚÜÊÝ[X]ÚY
+NÂH[ÙHÂÛÛÝÛH^[ÙXÚÜÖÚÙ^WNÂ^[ÙXÚÜÖÚÙ^WHHX[NÂYÛ	ÛOOHX[JHÛX\ÝÛÝX[TXÚÜÊÝ[X]ÚY
+NÂB[\^[ÙXÚÙ]
 
-// ════════════════════ PLAYOFF BRACKET ════════════════════
+NÂB[Ý[ÛÛX\ÝÛÝX[TXÚÜÊÝ[X]ÚY
+^ÂÛÛÝHHVSÑÔÕSË[^ÙÝ[
+NÂYHHVSÑÔÕSË[ÝHJH]\ÂÛÛÝ^HVSÑÔÕSÖÜH
+ÈWNÂÛÛÝHHX]ÛÜX]ÚYÈNÂÛÛÝÙ^HH	Û^KIÛ_XÂY^[ÙXÚÜÖÛÙ^WJ^Â[]H^[ÙXÚÜÖÛÙ^WNÂÛX\ÝÛÝX[TXÚÜÊ^JNÂBB[Ý[Û\]T^[ÙØ]P
+^ÂÛÛÝHØÝ[Y[Ù][[Y[RY
+	ÜØ]T^[ÙÊNÂÛÛÝÙÈHØÝ[Y[Ù][[Y[RY
+	Ü^[ÙÙÜ\ÜÕ^	ÊNÂYXH]\ÂÛÛÝØÚÙYH]È]J
+HHVSÑÑPQSNÂÛÛÝÝ[HØXÝ[Y\ÊÕSÐÓÕSÊKYXÙJ
+KOOJØ
+NÂÛÛÝXÚÙYHØXÝÙ^\Ê^[ÙXÚÜÊK[ÝÂYØÚÙY
+^Â^ÛÛ[H	ü'å$^[ÙXÚÜÈØÚÙY	ÎÈ\ØXYHYNÂH[ÙHÂ^ÛÛ[H<'ä¯Ø]H^[ÙXÚÜØÈ\ØXYH[ÙNÂBYÙÊHÙË^ÛÛ[H	ÜXÚÙYHÈ	ÝÝ[HX]Ú\ÈXÚÙYÂB\Þ[È[Ý[ÛØ]T^[ÙXÚÜÊ
+^ÂY]È]J
+HHVSÑÑPQSJ^ÈØ\Ý
+	ø£ì^[ÙXÚÜÈ\HØÚÙY	Ë	Ù\ÊNÈ]\ÈBÛÛÝHØÝ[Y[Ù][[Y[RY
+	ÜØ]T^[ÙÊNÂ^ÛÛ[H	ÔØ][ø )ÎÈ\ØXYHYNÂ^ÂÛÛÝÜÈHØ[Ý[]TØÛÜJ
+NÂÛÛÝÈHØ[Ý[]T^[ÙØÛÜJ
+NÂ]ØZ]ÛÛXÝ[Û	ÜXÚÜÉÊKØÊÝ\[\Ù\Y
+KÙ]
+Â[YNÝ\[\Ù\[YK^[ÙXÚÜË^[ÙØÛÜNËØÛÜNÜËÝ[ØÛÜNÜÈ
+ÈËØ]Y]\X\ÙK\\ÝÜKY[[YKÙ\\[Y\Ý[\
 
-// Returns the two teams for a given match.
-// For R32: always uses R32_BRACKET (hardcoded FIFA matchups in correct bracket order).
-//          Admin-entered Firestore data overrides if present (e.g. to record actual winners).
-// For R16+: derives teams from the user's picks in the previous round.
-function getMatchTeams(round, idx){
-  if(round === 'R32'){
-    // Prefer Firestore data (admin can override home/away if needed)
-    const m = playoffBracket['R32']?.[idx];
-    if(m && m.home && m.away) return { home: m.home, away: m.away };
-    // Fall back to hardcoded correct bracket
-    return R32_BRACKET[idx] || { home: null, away: null };
-  }
-  // For R16, QF, SF, Final: derive from user's picks in the previous round
-  const ri = PLAYOFF_ROUNDS.indexOf(round);
-  if(ri <= 0) return { home: null, away: null };
-  const prev = PLAYOFF_ROUNDS[ri - 1];
-  return {
-    home: playoffPicks[`${prev}-${idx*2}`]   || null,
-    away: playoffPicks[`${prev}-${idx*2+1}`] || null,
-  };
-}
+BKÈY\ÙNYHJNÂ^ÛÛ[H	ø§!HØ]YIÎÂØ\Ý
+	ø§!H^[ÙXÚÜÈØ]YIÊNÂ\]TØÛÜJ
+NÂÙ][Y[Ý]
 
-function renderPlayoffBracket(){
-  const c = document.getElementById('playoffBracketContainer');
-  if(!c) return;
-  const locked = new Date() >= PLAYOFF_DEADLINE;
-  let html = '';
 
-  for(const round of PLAYOFF_ROUNDS){
-    const count = ROUND_COUNTS[round];
-    html += `<div class="round-section">
-      <div class="round-header">
-        <span>${ROUND_LABELS[round]}</span>
-        <span class="round-pts-badge">${ROUND_PTS[round]} pt${ROUND_PTS[round]>1?'s':''}/correct</span>
-      </div>`;
+OOÈ^ÛÛ[Iü'ä¯Ø]H^[ÙXÚÜÉÎÈ\ØXYY[ÙNÈKÌ
+NÂHØ]Ú
+J^ÂØ\Ý
+	ø§cØ]HZ[Y8 %ÚXÚÈÛÛXÝ[ÛË	Ù\ÊNÂ^ÛÛ[Iü'ä¯Ø]H^[ÙXÚÜÉÎÈ\ØXYY[ÙNÂBB[Ý[ÛÛÛ\]YÛÝ[
 
-    for(let i=0; i<count; i++){
-      const {home, away} = getMatchTeams(round, i);
-      const key = `${round}-${i}`;
-      const userPick  = playoffPicks[key];
-      const actual    = playoffBracket[round]?.[i]?.winner || null;
+^È]\ØXÝÙ^\ÊÔÕTÊK[\ÈO
+XÚÜÖÙ×_×JK[ÝOOM
+K[ÝÈB[Ý[ÛXY[T\ÜÙY
 
-      const teamBtn = (team) => {
-        if(!team) return `<button class="po-team tbd" disabled>
-          <span class="po-flag">🏳️</span><span class="po-name">TBD</span></button>`;
-        const isPicked   = userPick === team;
-        const isCorrect  = actual && isPicked && actual === team;
-        const isWrong    = actual && isPicked && actual !== team;
-        let cls = 'po-team';
-        if(isPicked){ cls += isCorrect ? ' correct' : isWrong ? ' wrong' : ' picked'; }
-        const check = isCorrect ? '✅' : isWrong ? '❌' : isPicked ? '✓' : '';
-        const safe  = team.replace(/'/g,"\\'");
-        const click = locked ? '' : `pickPlayoffWinner('${round}',${i},'${safe}')`;
-        return `<button class="${cls}" onclick="${click}" ${locked?'disabled':''}>
-          <span class="po-flag">${FLAGS[team]||'🏳️'}</span>
-          <span class="po-name">${team}</span>
-          ${check?`<span class="po-check">${check}</span>`:''}
-        </button>`;
-      };
+^È]\]È]J
+HHPÒ×ÑPQSNÈB[Ý[ÛØ\Ý
+\ÙË\J^ÂÛÛÝ[HØÝ[Y[Ù][[Y[RY
+	ÝØ\Ý	ÊNÂ[^ÛÛ[H\ÙÎÂ[Û\ÜÓ[YHH	ÝØ\Ý	È
+È
+\OOOIÙ\ÈÈ	È\È	ÉÊH
+È	ÈÚÝÉÎÂÙ][Y[Ý]
 
-      const matchLabel = round === 'F' ? 'Championship' : `Match ${i+1}`;
-      html += `<div class="match-card">
-        <div class="match-num">${matchLabel}</div>
-        <div class="match-teams">${teamBtn(home)}${teamBtn(away)}</div>
-      </div>`;
-    }
-    html += `</div>`;
-  }
 
-  c.innerHTML = html;
-  updatePlayoffSaveBtn();
-}
+OOÈ[Û\ÜÓ\Ý[[ÝJ	ÜÚÝÉÊNÈKÌ
+NÂBËÈ8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥dQRS8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d[Ý[ÛÚÝÐYZ[ÙÚ[
+^ÂÛÛÝÈHÛ\
+	ÐYZ[\ÜÝÛÜÊNÂYÈOOHQRSÔTÔÕÓÔ
+^Â\ÐYZ[HYNÂØÝ[Y[Ù][[Y[RY
+	ØYZ[[[	ÊKÝ[K\Ü^HH	ØØÚÉÎÂ[\YZ[\Ý[Ê
+NÂØÝ[Y[Ù][[Y[RY
+	ØYZ[[[	ÊKØÜÛ[ÕY]ÊÈZ][ÜÜÛ[ÛÝ	ÈJNÂH[ÙHYÈOOH[
+^Â[\
+	ÕÜÛÈ\ÜÝÛÜÊNÂBB[Ý[Û[\YZ[\Ý[Ê
+^ÂÛÛÝÈHØÝ[Y[Ù][[Y[RY
+	ØYZ[\Ý[ÐÛÛZ[\ÊNÂË[\SHØXÝ[Y\ÊÔÕTÊKX\
 
-function pickPlayoffWinner(round, matchIdx, team){
-  if(new Date() >= PLAYOFF_DEADLINE){ toast('⏰ Playoff picks are locked','err'); return; }
-  const key = `${round}-${matchIdx}`;
-  if(playoffPicks[key] === team){
-    delete playoffPicks[key];
-    clearDownstreamPicks(round, matchIdx);
-  } else {
-    const old = playoffPicks[key];
-    playoffPicks[key] = team;
-    if(old && old !== team) clearDownstreamPicks(round, matchIdx);
-  }
-  renderPlayoffBracket();
-}
+Û]\X[\×JHO]Û\ÜÏHYZ[YÜÝ\XØÚÈ]Û\ÜÏHYZ[YÜÝ\[X[ÜÝ\	Û]\OÙ]ÓÔSSËX\
 
-function clearDownstreamPicks(round, matchIdx){
-  const ri = PLAYOFF_ROUNDS.indexOf(round);
-  if(ri >= PLAYOFF_ROUNDS.length - 1) return;
-  const next = PLAYOFF_ROUNDS[ri + 1];
-  const ni   = Math.floor(matchIdx / 2);
-  const nkey = `${next}-${ni}`;
-  if(playoffPicks[nkey]){
-    delete playoffPicks[nkey];
-    clearDownstreamPicks(next, ni);
-  }
-}
+ÜJHO]Û\ÜÏH\Ý[\ÝÈÜ[Û\ÜÏH\Ý[\ÜÈÛÜOÜÜ[Ù[XÝYHÉÛ]\WÉÚ_HÜ[Û[YOH¸ %Ù[XÝ8 %ÛÜ[ÛÝX[\ËX\
+OÜ[Û[YOHÝH	Ü\Ý[ÖÛ]\OËÚWOOO]ÉÜÙ[XÝY	ÎÉßOÑQÔÖÝ_	ÉßH	ÝOÛÜ[Û
+KÚ[	ÉÊ_BÜÙ[XÝÙ]
+KÚ[	ÉÊ_BÙ]
+KÚ[	ÉÊNÂB\Þ[È[Ý[ÛYZ[Ø]T\Ý[Ê
+^ÂÛÛÝ]ÔHßNÂÜÛÛÝ]\ÙØXÝÙ^\ÊÔÕTÊJ^Â]ÔÛ]\HHÔSSËX\
 
-function updatePlayoffSaveBtn(){
-  const btn  = document.getElementById('savePlayoffBtn');
-  const prog = document.getElementById('playoffProgressText');
-  if(!btn) return;
-  const locked = new Date() >= PLAYOFF_DEADLINE;
-  const total  = Object.values(ROUND_COUNTS).reduce((a,b)=>a+b,0); // 31
-  const picked = Object.keys(playoffPicks).length;
-  if(locked){
-    btn.textContent = '🔒 Playoff Picks Locked'; btn.disabled = true;
-  } else {
-    btn.textContent = `💾 Save Playoff Picks`; btn.disabled = false;
-  }
-  if(prog) prog.textContent = `${picked} / ${total} matches picked`;
-}
+ËJHOØÝ[Y[Ù][[Y[RY
+ÉÛ]\WÉÚ_X
+OË[YH	ÉÊNÂB]ØZ]ÛÛXÝ[Û	Ü\Ý[ÉÊKØÊ	ÙÜÝ\ÉÊKÙ]
+]ÔNÂ\Ý[ÈH]ÔÂØ\Ý
+	ø§!H\Ý[ÈØ]YIÊNÂ]ØZ]YZ[XØ[ÔØÛÜ\Ê
+NÂÜÛÛÝÈÙØXÝÙ^\ÊÔÕTÊJH[\ÜÝ\
+ÊNÂ\]TØÛÜJ
+NÂB\Þ[È[Ý[ÛYZ[XØ[ÔØÛÜ\Ê
+^Â^ÂÛÛÝ^[ÙØÈH]ØZ]ÛÛXÝ[Û	Ü\Ý[ÉÊKØÊ	Ü^[ÙÊKÙ]
 
-async function savePlayoffPicks(){
-  if(new Date() >= PLAYOFF_DEADLINE){ toast('⏰ Playoff picks are locked','err'); return; }
-  const btn = document.getElementById('savePlayoffBtn');
-  btn.textContent = 'Saving…'; btn.disabled = true;
-  try{
-    const gs = calculateScore();
-    const ps = calculatePlayoffScore();
-    await db.collection('picks').doc(currentUser.id).set({
-      name: currentUser.name,
-      playoffPicks,
-      playoffScore: ps,
-      score: gs,
-      totalScore: gs + ps,
-      savedAt: firebase.firestore.FieldValue.serverTimestamp()
-    }, { merge: true });
-    btn.textContent = '✅ Saved!';
-    toast('✅ Playoff picks saved!');
-    updateScore();
-    setTimeout(()=>{ btn.textContent='💾 Save Playoff Picks'; btn.disabled=false; }, 3000);
-  } catch(e){
-    toast('❌ Save failed — check connection','err');
-    btn.textContent='💾 Save Playoff Picks'; btn.disabled=false;
-  }
-}
+NÂÛÛÝXÚÙ]H^[ÙØË^\ÝÈÈ^[ÙØË]J
+HßNÂÛÛÝÛ\H]ØZ]ÛÛXÝ[Û	ÜXÚÜÉÊKÙ]
 
-function completedCount(){ return Object.keys(GROUPS).filter(g => (picks[g]||[]).length===4).length; }
-function deadlinePassed(){ return new Date() >= PICK_DEADLINE; }
+NÂÛÛÝ]ÚH]Ú
 
-function toast(msg, type){
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.className = 'toast' + (type==='err' ? ' err' : '') + ' show';
-  setTimeout(()=>{ el.classList.remove('show'); }, 3200);
-}
+NÂÛÛÝÜ[H\Ý[ËÙØ[Y\Ô^YYßNÂÛ\ÜXXÚ
+ØÈOÂÛÛÝHØË]J
+NÂ]ÜÈHÂÜÛÛÝÈÙØXÝÙ^\ÊÔÕTÊJ^ÂYXÚÜÏËÙ×H	\Ý[ÖÙ×JHÜÈ
+ÏHØÛÜQÜÝ\
+XÚÜÖÙ×K\Ý[ÖÙ×KÜ[Ù×JNÂB]ÈHÂY^[ÙXÚÜÊ^ÂÜÛÛÝÝ[ÙVSÑÔÕSÊ^ÂÛÛÝÛÝ[HÕSÐÓÕSÖÜÝ[NÂÜ]OLÈOÛÝ[ÈJÊÊ^ÂÛÛÝXÝX[HXÚÙ]ÜÝ[OËÚWOËÚ[\ÂYXÝX[	^[ÙXÚÜÖØ	ÜÝ[KIÚ_XHOOHXÝX[
+HÈ
+ÏHÕSÔÖÜÝ[NÂBBB]Ú\]JØËYÈØÛÜNÜË^[ÙØÛÜNËÝ[ØÛÜNÜÈ
+ÈÈJNÂJNÂ]ØZ]]ÚÛÛ[Z]
 
-// ════════════════════ ADMIN ════════════════════
-function showAdminLogin(){
-  const pw = prompt('Admin password:');
-  if(pw === ADMIN_PASSWORD){
-    isAdmin = true;
-    document.getElementById('adminPanel').style.display = 'block';
-    renderAdminResults();
-    document.getElementById('adminPanel').scrollIntoView({ behavior:'smooth' });
-  } else if(pw !== null){
-    alert('Wrong password.');
-  }
-}
+NÂØ\Ý
+	ø§!HØÛÜ\ÈXØ[Ý[]YIÊNÂØYXY\Ø\
 
-function renderAdminResults(){
-  const c = document.getElementById('adminResultsContainer');
-  c.innerHTML = Object.entries(GROUPS).map(([letter, teams]) => `
-    <div class="admin-group-block">
-      <div class="admin-group-label">Group ${letter}</div>
-      ${ORDINALS.map((ord,i) => `
-        <div class="result-row">
-          <span class="result-pos">${ord}</span>
-          <select id="r_${letter}_${i}">
-            <option value="">— select —</option>
-            ${teams.map(t => `<option value="${t}" ${results[letter]?.[i]===t?'selected':''}>${FLAGS[t]||''} ${t}</option>`).join('')}
-          </select>
-        </div>`).join('')}
-    </div>`).join('');
-}
-
-async function adminSaveResults(){
-  const newR = {};
-  for(const letter of Object.keys(GROUPS)){
-    newR[letter] = ORDINALS.map((_,i) => document.getElementById(`r_${letter}_${i}`)?.value || '');
-  }
-  await db.collection('results').doc('groups').set(newR);
-  results = newR;
-  toast('✅ Results saved!');
-  await adminRecalcScores();
-  // Re-render groups to show pts
-  for(const g of Object.keys(GROUPS)) renderGroup(g);
-  updateScore();
-}
-
-async function adminRecalcScores(){
-  try{
-    // Fetch latest playoff results
-    const playoffDoc = await db.collection('results').doc('playoff').get();
-    const pBracket = playoffDoc.exists ? playoffDoc.data() : {};
-
-    const snap = await db.collection('picks').get();
-    const batch = db.batch();
-    const gpAll = results._gamesPlayed || {};
-    snap.forEach(doc => {
-      const d = doc.data();
-      // Group score
-      let gs = 0;
-      for(const g of Object.keys(GROUPS)){
-        if(d.picks?.[g] && results[g]) gs += scoreGroup(d.picks[g], results[g], gpAll[g]);
-      }
-      // Playoff score
-      let ps = 0;
-      if(d.playoffPicks){
-        for(const round of PLAYOFF_ROUNDS){
-          const count = ROUND_COUNTS[round];
-          for(let i=0; i<count; i++){
-            const actual = pBracket[round]?.[i]?.winner;
-            if(actual && d.playoffPicks[`${round}-${i}`] === actual) ps += ROUND_PTS[round];
-          }
-        }
-      }
-      batch.update(doc.ref, { score: gs, playoffScore: ps, totalScore: gs + ps });
-    });
-    await batch.commit();
-    toast('✅ Scores recalculated!');
-    loadLeaderboard();
-  } catch(e){ toast('Error recalculating: '+e.message,'err'); }
-}
-
-async function adminTogglePlayoff(){
-  playoffUnlocked = !playoffUnlocked;
-  await db.collection('settings').doc('global').set({ playoffUnlocked }, { merge:true });
-  document.getElementById('playoffToggleBtn').textContent = playoffUnlocked ? '🔒 Lock Playoff Tab' : '🔓 Unlock Playoff Tab';
-  if(playoffUnlocked){
-    await applyPlayoffUnlock();
-  } else {
-    document.getElementById('tabBtn-playoffs').textContent = 'Playoffs 🔒';
-    document.getElementById('playoffLocked').style.display = 'block';
-    document.getElementById('playoffOpen').style.display = 'none';
-  }
-  toast(`Playoff tab ${playoffUnlocked?'unlocked':'locked'}!`);
-}
-</script>
-</body>
-</html>
+NÂHØ]Ú
+J^ÈØ\Ý
+	Ñ\ÜXØ[Ý[][Î	ÊÙKY\ÜØYÙK	Ù\ÊNÈBB\Þ[È[Ý[ÛYZ[ÙÙÛT^[Ù
+^Â^[Ù[ØÚÙYH\^[Ù[ØÚÙYÂ]ØZ]ÛÛXÝ[Û	ÜÙ][ÜÉÊKØÊ	ÙÛØ[	ÊKÙ]
+È^[Ù[ØÚÙYKÈY\ÙNYHJNÂØÝ[Y[Ù][[Y[RY
+	Ü^[ÙÙÙÛPÊK^ÛÛ[H^[Ù[ØÚÙYÈ	ü'å$ØÚÈ^[ÙXÈ	ü'å$È[ØÚÈ^[ÙXÎÂY^[Ù[ØÚÙY
+^Â\T^[Ù[ØÚÕRJ
+NÂH[ÙHÂØÝ[Y[Ù][[Y[RY
+	ÝX\^[ÙÉÊK^ÛÛ[H	Ô^[ÙÈ<'å$ÎÂØÝ[Y[Ù][[Y[RY
+	Ü^[ÙØÚÙY	ÊKÝ[K\Ü^HH	ØØÚÉÎÂØÝ[Y[Ù][[Y[RY
+	Ü^[ÙÜ[ÊKÝ[K\Ü^HH	ÛÛIÎÂBØ\Ý
+^[ÙX	Ü^[Ù[ØÚÙYÉÝ[ØÚÙY	ÎÛØÚÙY	ßHX
+NÂBÜØÜ\ØÙOÚ[
