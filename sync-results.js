@@ -40,7 +40,7 @@ const GROUPS = {
 // ── Playoff constants ────────────────────────────────────────────────────────
 const PLAYOFF_ROUNDS = ['R32','R16','QF','SF','F'];
 const ROUND_COUNTS = {R32:16, R16:8, QF:4, SF:2, F:1};
-const ROUND_PTS = {R32:1, R16:2, QF:3, SF:4, F:5};
+const ROUND_PTS = {R32:2, R16:3, QF:5, SF:8, F:13};
 
 // ESPN season type IDs for each knockout round
 const ESPN_ROUND_TYPES = {
@@ -65,12 +65,12 @@ const R32_BRACKET_ORDER = [
   { home: 'Belgium',            away: 'Senegal'             }, // [7]
   { home: 'Brazil',             away: 'Japan'               }, // [8]
   { home: "Côte d'Ivoire",      away: 'Norway'              }, // [9]
-  { home: 'Mexico',             away: 'Ecuador'             }, // [10]
+  { home: 'Mexico',             away:'Ecuador'             }, // [10]
   { home: 'England',            away: 'Congo DR'            }, // [11]
   { home: 'Argentina',          away: 'Cabo Verde'          }, // [12]
   { home: 'Australia',          away: 'Egypt'               }, // [13]
   { home: 'Switzerland',        away: 'Algeria'             }, // [14]
-  { home: 'Colombia',           away: 'Ghana'               }, // [15]
+  { home: 'Colombia',           away: 'Ghana'                }, // [15]
 ];
 
 // Reorder a raw ESPN bracket so match indices align with the app's R32_BRACKET_ORDER
@@ -215,9 +215,9 @@ async function fetchKnockoutBracket(teamIdToName) {
           }
 
           if (!home && !away) continue;
-          matches.push({ home: home || 'TBD', away: away || 'TBD', winner: winner || null });
+          matches.push({ home: home || 'TBD', away:away || 'TBD', winner: winner || null });
         } catch(e) {
-          console.warn(`  Event fetch error: ${e.message}`);
+          console.warn(`   Event fetch error: ${e.message}`);
         }
       }
 
@@ -299,7 +299,19 @@ async function main() {
     const orderedBracket = reorderPlayoffBracket(rawBracket);
     console.log('Reordered bracket to match app indices.');
 
-    // Write full ordered bracket (no merge — always use fresh ordered data)
+    // Read existing Firestore data and preserve any winners that the new fetch may have missed.
+    // This prevents a temporary ESPN API glitch from wiping previously-recorded results.
+    const existingDoc = await db.collection('results').doc('playoff').get();
+    const existing = existingDoc.exists ? existingDoc.data() : {};
+    for (const round of PLAYOFF_ROUNDS) {
+      if (!orderedBracket[round]) continue;
+      const existingRound = existing[round] || [];
+      orderedBracket[round] = orderedBracket[round].map((m, i) => ({
+        ...m,
+        winner: m.winner || existingRound[i]?.winner || null,
+      }));
+    }
+
     await db.collection('results').doc('playoff').set(orderedBracket);
     console.log('Playoff bracket written.');
 
