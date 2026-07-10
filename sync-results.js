@@ -19,6 +19,7 @@ const NAME_MAP = {
   'Ivory Coast': "Côte d'Ivoire",
   'Iran': 'IR Iran',
   'Cape Verde': 'Cabo Verde',
+  'DR Congo': 'Congo DR',
 };
 
 // ── App's group definitions ──────────────────────────────────────────────────
@@ -37,18 +38,28 @@ const GROUPS = {
   L: ['Ghana','Panama','England','Croatia']
 };
 
+// ── Third-place teams that qualified for R32 (must match index.html) ─────────
+const THIRD_PLACE_QUALIFIERS = new Set([
+  'Ecuador','Sweden','Bosnia & Herzegovina','Paraguay',
+  'Senegal','Ghana','Algeria','Congo DR'
+]);
+
 // ── Playoff constants ────────────────────────────────────────────────────────
 const PLAYOFF_ROUNDS = ['R32','R16','QF','SF','F'];
 const ROUND_COUNTS = {R32:16, R16:8, QF:4, SF:2, F:1};
 const ROUND_PTS = {R32:2, R16:3, QF:5, SF:8, F:13};
 
-// ESPN season type IDs for each knockout round
+// ESPN season type IDs for each knockout round.
+// IMPORTANT: the /events endpoint's `seasontypes` param takes the season type
+// "id" (1-7 from /seasons/2026/types), NOT the internal "type" code.
+// The old 13xxx values silently return zero events.
+// 1=Groups, 2=R32, 3=R16, 4=QF, 5=SF, 6=3rd-Place (skipped), 7=Final
 const ESPN_ROUND_TYPES = {
-  R32: 13801,
-  R16: 13800,
-  QF:  13799,
-  SF:  13798,
-  F:   13797,
+  R32: 2,
+  R16: 3,
+  QF:  4,
+  SF:  5,
+  F:   7,
 };
 
 // ── Correct R32 bracket order — MUST match R32_BRACKET in index.html exactly ──
@@ -243,7 +254,9 @@ function scoreGroup(userPicks, actual, gp = {}) {
   for (let i = 0; i < 4; i++) {
     if (!userPicks[i]) continue;
     if (userPicks[i] === actual[i] && played(actual[i])) {
-      pts += PTS[i];
+      let p = PTS[i];
+      if (i === 2 && THIRD_PLACE_QUALIFIERS.has(userPicks[i])) p += 1;
+      pts += p;
     } else if (i < 2) {
       if (
         (actual[0] === userPicks[i] && played(actual[0])) ||
